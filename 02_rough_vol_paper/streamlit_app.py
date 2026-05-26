@@ -15,8 +15,8 @@ from pathlib import Path
 import sys
 import time
 
-SRC = Path(__file__).parent.parent / "src"
-sys.path.insert(0, str(SRC))
+SRC = Path(__file__).resolve().parent.parent / "02_rough_vol" / "src"
+sys.path.insert(0, str(SRC.resolve()))
 
 from rbm_reference import simulate_rbm_variance, simulate_rbm_blp, simulate_fbm_increments, compute_psd
 from bochner_pinn import (SpectralFilter, CausalSpectralFilter,
