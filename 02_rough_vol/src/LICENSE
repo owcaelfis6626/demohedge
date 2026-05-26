@@ -1,0 +1,21 @@
+GNU AFFERO GENERAL PUBLIC LICENSE v3.0
+
+Copyright (c) 2026 Hubert Lipski
+
+The source code in this directory (the spectral pricing engine, including
+SpectralFilter, CausalSpectralFilter, VolterraSurrogate, and all training
+and simulation modules) is licensed under the GNU Affero General Public
+License version 3.0 (AGPL-3.0).
+
+Full license text: https://www.gnu.org/licenses/agpl-3.0.txt
+
+Summary (not legal advice):
+- You may use, modify, and distribute this code.
+- If you run a modified version as a network service, you must make the
+  modified source available to users of that service.
+- This includes commercial use (e.g., options pricing at a financial
+  institution). If you do not wish to open-source your modifications,
+  contact the author for a commercial license.
+
+The rest of the repository (demo, README, documentation) is MIT-licensed.
+See the root LICENSE file.
