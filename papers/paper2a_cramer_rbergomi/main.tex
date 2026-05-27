@@ -1,0 +1,1649 @@
+%% main.tex, Paper 2: Spectral Surrogates for Rough Stochastic Volatility
+%%
+%% Working title: Distributional Learning of Rough Volatility via Spectral
+%%        Surrogates: a Cramér–Bochner PINN for fBm-Driven SDEs
+%%
+%% Target: SIAM Journal on Financial Mathematics / Quantitative Finance
+%%
+%% Build: pdflatex main → bibtex main → pdflatex main ×2
+%% ─────────────────────────────────────────────────────────────────────────────
+
+\documentclass[11pt,a4paper]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{mathtools}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\usepackage{cleveref}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{graphicx}
+\graphicspath{{../02_rough_vol/figures/}}
+\usepackage{xcolor}
+\usepackage{microtype}
+\usepackage{natbib}
+
+% ── Theorem environments ──────────────────────────────────────────────────────
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{assumption}{Assumption}
+\renewcommand{\theassumption}{A\arabic{assumption}}
+
+% ── Notation ─────────────────────────────────────────────────────────────────
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\Law}{\mathcal{L}}
+\newcommand{\W}{W_2}        % Wasserstein-2
+\newcommand{\Hcal}{\mathcal{H}}
+\newcommand{\Lcal}{\mathcal{L}}
+\newcommand{\norm}[1]{\|#1\|}
+\newcommand{\HS}{\mathrm{HS}}
+\newcommand{\dt}{\,\mathrm{d}t}
+\newcommand{\dw}{\,\mathrm{d}W}
+\newcommand{\TODO}[1]{\textcolor{red}{[\textbf{TODO:} #1]}}
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{document}
+
+\title{Distributional Learning of Rough Volatility via Spectral Surrogates:\\
+    a Cramér PINN for Fractional Brownian Motion--Driven SDEs}
+
+\author{Hubert Lipski}
+\date{\today}
+\maketitle
+
+% ─────────────────────────────────────────────────────────────────────────────
+\begin{abstract}
+Rough stochastic volatility models, in which the log-variance is driven by a
+fractional Brownian motion with Hurst exponent $H \approx 0.1$, reproduce
+key empirical features of equity implied volatility but require expensive
+quasi-Monte Carlo simulation for option pricing. We introduce the
+\emph{Cramér PINN}, a neural-network surrogate trained to match the
+power-spectral density (PSD) of fractional Gaussian noise (fGn), the
+stationary increment process of fBm. The surrogate requires no
+numerical solver at inference time and generates variance paths by a
+single forward pass. We prove a $W_2$ convergence theorem showing that
+matching the exact fGn PSD forces the surrogate's law to converge to the
+reference process, with an explicit Hurst-exponent consistency corollary:
+if the training loss is $\varepsilon$, then $|\hat{H} - H| \leq C\sqrt{\varepsilon}$.
+On the rough Bergomi model ($H=0.1$, $\eta=1.9$, $\xi_0=0.04$), a linear
+spectral filter surrogate trained on the exact fGn PSD achieves an
+implied-volatility surface RMSE of \textbf{1.33~vol~points} vs.\ the MC
+reference, compared to \textbf{2.27~vp} for the asymptotic
+$C|f|^{1-2H}$ approximation. A nonlinear MLP surrogate trained with
+the same spectral loss reaches \textbf{1.21~vp}, confirming that the loss
+is architecture-agnostic. Under rough Heston with $\rho=-0.9$, we show that any surrogate matching
+only the marginal distribution of $V$ carries an \textbf{irreducible ATM
+delta bias of $-0.27$} ($35\%$ relative). We further show that circular
+FFT surrogates fail catastrophically at $\rho\neq 0$ (204~vp, delta $>1$)
+due to non-causal wrap-around, and that a \textbf{CausalSpectralFilter}
+(lower-triangular Toeplitz convolution, same PSD loss) resolves this,
+achieving \textbf{3.26~vp} vs.\ the BLP reference and reducing ATM delta
+bias to $-0.07$. Training the causal filter on the reference's own
+RL-fBm PSD eliminates the residual entirely: \textbf{2.57~vp} and ATM
+delta bias $\lesssim 0.01$ (Monte-Carlo-noise level). On rough Heston,
+the same spectral causal architecture cuts the cross-model bias from
+$+0.49$ to $-0.15$; a Volterra-aware autoregressive surrogate with
+$\sqrt{V_j}$ diffusion closes the residual to Monte-Carlo noise
+(\textbf{0.80~vp}, bias $\leq 0.005$). The same architecture, trained
+end-to-end from a misspecified init, calibrates to a live SPY option
+chain across three expirations ($32$, $88$, $179$ days; $26$ strikes
+total) at \textbf{$3.97$~vp overall IV RMSE} in $3$~minutes on a
+single GPU, with shared parameters across maturities.
+\end{abstract}
+
+\tableofcontents
+\newpage
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Introduction}
+\label{sec:intro}
+% ═════════════════════════════════════════════════════════════════════════════
+
+The empirical observation that log-volatility behaves like a fractional
+Brownian motion with Hurst exponent $H \approx 0.1$
+\citep{gatheral2018volatility} has led to a family of \emph{rough
+volatility} models that fit the implied volatility surface and the term
+structure of variance swaps more accurately than classical stochastic
+volatility models \citep{bayer2016pricing,ElEuch2019}. The prototypical
+example is the rough Bergomi (rBergomi) model \citep{bayer2016pricing}:
+\begin{equation}
+ V_t \;=\; \xi_0 \exp\!\Bigl(\eta W^H_t - \tfrac{1}{2}\eta^2 t^{2H}\Bigr),
+ \qquad
+ \frac{dS_t}{S_t} \;=\; \sqrt{V_t}\,dZ_t,
+ \label{eq:rbergomi}
+\end{equation}
+where $W^H$ is a fractional Brownian motion (fBm) with Hurst exponent
+$H$, and $(Z_t, W^H_t)$ are correlated.
+
+\paragraph{The computational bottleneck.}
+Pricing options under \eqref{eq:rbergomi} requires Monte Carlo simulation
+of fBm paths, which is inherently sequential and cannot exploit the
+structure of the problem. Quasi-Monte Carlo methods improve convergence
+rates \citep{bennedsen2017hybrid} but do not eliminate the cost. For
+applications such as deep hedging \citep{buhler2019deep}, which require
+millions of simulated paths, the cost is prohibitive.
+
+\paragraph{This paper.}
+We propose to replace the Monte Carlo simulator with a \emph{spectral
+surrogate}: a neural network trained to generate paths whose
+power-spectral density (PSD) matches the exact PSD of fractional Gaussian
+noise (fGn), the stationary increment process of fBm. This is a direct
+extension of the Bochner PINN framework of \citet{TODO-paper1}
+from stationary processes (where Bochner's theorem applies) to processes
+with stationary increments (where the Cramér spectral representation
+applies).
+
+\paragraph{Contributions.}
+\begin{enumerate}
+ \item \textbf{Cramér PINN architecture.} A linear spectral filter
+  (SpectralFilter, 126 parameters) and a nonlinear MLP (BochnerMLP,
+  41k parameters) both trained to minimise the log-PSD MSE against the
+  exact fGn PSD. Smart initialisation from the analytical optimum
+  reduces training to fine-tuning.
+
+ \item \textbf{Convergence theorem.} Under mild regularity assumptions,
+  matching the fGn PSD in $L^2$ forces $W_2$-convergence of the
+  surrogate to the reference process. Corollary: $|\hat{H} - H| \leq
+  C\sqrt{\varepsilon}$.
+
+ \item \textbf{Financial validation.} On the rBergomi model, the
+  spectral surrogate achieves 1.21--1.33~vol-point IV surface RMSE
+  vs.\ MC truth, near the Monte Carlo noise floor with 10k paths.
+
+ \item \textbf{Exact vs.\ asymptotic PSD.} The asymptotic power-law
+  $C|f|^{1-2H}$ is a 1.7$\times$ worse spectral target than the
+  exact Monte Carlo fGn PSD across all maturities, most severely at
+  long maturities ($T=1$: 3.20 vs.\ 1.89~vp).
+
+ \item \textbf{Leverage-effect, Greek bias, and causal architecture.}
+  Under rough Heston ($\rho=-0.9$), any marginal-$V$ surrogate carries
+  an irreducible ATM delta bias of $-0.27$ ($35\%$). A circular
+  $z$-Cholesky attempt fails (204~vp, delta $>1$), with non-causal FFT
+  wrap-around as the precise obstruction. A \textbf{CausalSpectralFilter}
+  (lower-triangular Toeplitz, same PSD loss) resolves this, achieving
+  \textbf{3.26~vp} vs.\ BLP rBergomi reference (63$\times$ improvement)
+  and reducing ATM delta bias to $-0.07$; matching the training PSD to
+  the reference's RL-fBm distribution drops both to \textbf{2.57~vp}
+  and $\lesssim 0.01$, Monte-Carlo-noise level. On rough Heston the
+  same spectral architecture cuts the cross-model bias from $+0.49$
+  to $-0.15$ (41$\times$ IV RMSE improvement, recovering $\sim\!42\%$
+  of the leverage effect), and the remaining gap closes to MC noise
+  (\textbf{0.80~vp}, bias $\lesssim 0.005$) with a Volterra-aware
+  autoregressive surrogate, pinpointing the V-conditional diffusion
+  ($\sqrt{V_j}$ in the noise term) as the precise architectural
+  requirement.
+
+ \item \textbf{Trainability and live-market validation.}
+  The full parameter set $(\theta, c_{\rm drift}, c_{\rm stoch}, \beta,
+  \{w_i\})$ is trainable end-to-end from a misspecified init via
+  backprop through the autoregressive Volterra update; joint training
+  on synthetic rough Heston with a price + V-moment loss reaches
+  \textbf{1.85~vp} (close to the architectural $0.80$~vp ceiling).
+  On a live SPY option chain (Yahoo Finance, three expirations spanning
+  $32$ to $179$ days, $26$ strikes total across $K/S_0 \in [0.85, 1.15]$),
+  the same surrogate calibrates simultaneously to all maturities at
+  \textbf{$3.97$~vp overall IV RMSE} (short-end $2.27$~vp) in
+  $3$~minutes on a GTX~950, within $2\times$ of the bid/ask-implied
+  IV uncertainty at the short end. All parameters are \emph{shared}
+  across maturities; the $\sim\!5$~vp long-end residual reflects the
+  known forward-variance term-structure limitation of stationary
+  rough-vol calibrations. A Markovian variant
+  of the kernel ($M = 5$ exponentials) gives a $7\times$ inference
+  speedup with no loss in IV-RMSE accuracy.
+\end{enumerate}
+
+\paragraph{Relation to Paper 1.} \citet{TODO-paper1} prove a $W_2$
+convergence theorem for Bochner PINNs applied to Lévy-driven SPDEs whose
+solutions are stationary. fBm is not stationary but has stationary
+increments; the Cramér representation replaces Bochner's theorem and all
+other proof steps carry over unchanged. \Cref{sec:theory} makes this
+precise.
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Background}
+\label{sec:background}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\subsection{The rough Bergomi model}
+
+Let $(\Omega, \mathcal{F}, \mathbb{P})$ be a probability space.
+The \emph{rough Bergomi} model \citep{bayer2016pricing} specifies the
+stock price $S_t$ and instantaneous variance $V_t$ by
+\eqref{eq:rbergomi}, where:
+\begin{itemize}
+ \item $W^H_t$ is a fractional Brownian motion with Hurst exponent
+  $H \in (0, \tfrac{1}{2})$, defined via the Riemann--Liouville
+  representation
+  $W^H_t = \int_0^t (t-s)^{H-1/2} \dw_s / \Gamma(H + \tfrac{1}{2})$.
+ \item $\xi_0 > 0$ is the initial forward variance (spot vol
+  $\sqrt{\xi_0}$).
+ \item $\eta > 0$ is the vol-of-vol parameter.
+ \item The Itô correction $-\frac{1}{2}\eta^2 t^{2H}$ ensures
+  $\E[V_t] = \xi_0$ for all $t$.
+\end{itemize}
+
+\paragraph{Why fBm?} The process $\log V_t = \log \xi_0 + \eta W^H_t -
+\frac{1}{2}\eta^2 t^{2H}$ has increments driven by fBm. For $H < 1/2$,
+$W^H$ has negatively correlated increments and paths that are
+H\"older-continuous of order $H - \varepsilon$ but not differentiable.
+This \emph{roughness} is precisely what the empirical evidence
+demands \citep{gatheral2018volatility}.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\textwidth]{roughness_gallery}
+ \caption{%
+  \textbf{Roughness gallery.}
+  Simulated fBm paths $W^H_t$ (top row) and instantaneous variance
+  $V_t = \xi_0\exp(\eta W^H_t - \tfrac{1}{2}\eta^2 t^{2H})$ (bottom row)
+  for $H \in \{0.50, 0.30, 0.10, 0.05\}$, with $\eta=1.9$, $\xi_0=0.04$.
+  Decreasing $H$ produces increasingly rough, rapidly mean-reverting
+  paths. The empirically calibrated value $H \approx 0.1$ (third
+  column) generates the jagged, persistent variance clustering seen
+  in equity markets. Standard Brownian motion ($H=0.5$, left) is
+  manifestly too smooth.
+ }
+ \label{fig:roughness-gallery}
+\end{figure}
+
+\subsection{Fractional Gaussian noise and its PSD}
+\label{sec:fgn-psd}
+
+The \emph{fractional Gaussian noise} (fGn) is the increment process
+$\Delta W^H_k = W^H_{k/N} - W^H_{(k-1)/N}$, $k = 1, \ldots, N$.
+Unlike fBm, fGn is stationary. Its power spectral density is
+\begin{equation}
+ S_H(f) \;=\; \sigma^2 \int_{-\infty}^{\infty}
+  e^{-2\pi i f x}\, r(x) \,\mathrm{d}x,
+ \qquad
+ r(n) = \tfrac{1}{2}(|n+1|^{2H} + |n-1|^{2H} - 2|n|^{2H}),
+ \label{eq:fgn-psd}
+\end{equation}
+where $r(n)$ is the autocovariance at lag $n$. The \emph{asymptotic}
+behaviour for $f \to 0$ is the power law
+\begin{equation}
+ S_H(f) \;\sim\; C_H |f|^{1-2H}, \qquad
+ C_H = \Gamma(2H+1)\sin(\pi H)/(2\pi).
+ \label{eq:power-law}
+\end{equation}
+For $H = 0.1$: $1 - 2H = 0.8$ (the PSD \emph{increases} with frequency,
+reflecting roughness). For $H = 0.5$ (standard BM): $S_{1/2}(f) =
+\text{const}$ (white noise).
+
+\paragraph{Key point.} The asymptotic law \eqref{eq:power-law} holds
+only as $f \to 0$. At mid-frequencies the exact PSD \eqref{eq:fgn-psd}
+deviates from the power law, and this deviation drives the difference
+between our two training targets (see \cref{sec:experiments}).
+
+\subsection{Cramér spectral representation}
+
+For a centred Gaussian process $u$ with stationary increments, the
+\emph{Cramér representation} \citep{cramer1942harmonic} is
+\begin{equation}
+ u(t) - u(0) \;=\; \int_{-\infty}^{\infty}
+  \bigl(e^{i\omega t} - 1\bigr) Z(\mathrm{d}\omega),
+ \label{eq:cramer}
+\end{equation}
+where $Z$ is an orthogonal random measure with
+$\E|Z(\mathrm{d}\omega)|^2 = S(\omega)\,\mathrm{d}\omega$.
+This is the analogue of Bochner's theorem for processes with stationary
+levels; it plays the same role in the Paper 2 proof that Bochner plays
+in Paper 1.
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Spectral Surrogates for fBm-Driven SDEs}
+\label{sec:method}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\subsection{Architecture}
+
+We train a neural network $f_\theta : \R^N \to \R^N$ to generate fGn
+increment sequences $\Delta W \approx f_\theta(z)$ from i.i.d.\ Gaussian
+input $z \sim \mathcal{N}(0, I_N)$. Two architectures:
+
+\paragraph{SpectralFilter.} A learnable per-frequency log-amplitude filter:
+\begin{equation}
+ f_\theta(z) \;=\; \mathrm{IRFFT}\!\bigl(A \cdot \mathrm{RFFT}(z)\bigr),
+ \qquad
+ A_k = \begin{cases} 0 & k = 0 \\ \exp(\alpha_k) & k = 1,\ldots, N/2 \end{cases}
+ \label{eq:spectral-filter}
+\end{equation}
+where $\boldsymbol{\alpha} \in \R^{N/2}$ are the learnable parameters
+(126 for $N=252$). The DC component is fixed to zero to enforce
+zero-mean output and prevent unpenalised drift accumulation in cumulative
+sums. Setting $A_k = 0$ at DC ensures $\E[\Delta W_k] = 0$ and
+$\mathrm{Var}[\sum_k \Delta W_k]$ is determined entirely by the
+spectral shape.
+
+\textbf{Optimal solution.} The output $f_\theta(z)$ is Gaussian by
+linearity. At the training optimum, $\E[\mathrm{psd}(f_\theta(z), f_k)]
+= S_H(f_k)$ for each frequency $f_k$, which gives the analytic solution
+\begin{equation}
+ \alpha_k^* = \tfrac{1}{2}\log\!\bigl(S_H(f_k) \cdot N / (2\,\mathrm{d}t)\bigr).
+ \label{eq:smart-init}
+\end{equation}
+We use \eqref{eq:smart-init} as the initialisation (\emph{smart init}),
+reducing training to fine-tuning (initial loss $\approx 0.018$ vs.\
+$\approx 3.1$ from zero-initialisation).
+
+\paragraph{BochnerMLP.} A small fully-connected network with Tanh
+activations:
+\begin{equation}
+ f_\theta(z) \;=\; \mathrm{MLP}(z) - \overline{\mathrm{MLP}(z)},
+ \label{eq:mlp}
+\end{equation}
+where the mean subtraction enforces zero-mean output. Architecture:
+$N \to 64 \to 64 \to 64 \to N$, 40\,892 parameters for $N=252$.
+The MLP generates non-Gaussian paths; the spectral loss is
+architecture-agnostic.
+
+\subsection{Spectral loss}
+
+Let $\hat{S}(\Delta W, f_k) = (2\,\mathrm{d}t / N)|[\mathrm{RFFT}(\Delta W
+- \overline{\Delta W})]_k|^2$ be the one-sided periodogram. The
+\emph{Bochner spectral loss} is the log-MSE:
+\begin{equation}
+ \mathcal{L}(\theta) \;=\;
+ \frac{1}{N/2} \sum_{k=1}^{N/2}
+ \Bigl(\log \hat{S}(f_\theta(z), f_k) - \log S_H(f_k)\Bigr)^2,
+ \label{eq:loss}
+\end{equation}
+averaged over a mini-batch. The log transformation gives equal
+relative weight to each frequency, preventing the high-power
+low-frequency bins from dominating.
+
+Two training targets:
+\begin{enumerate}
+ \item \textbf{Exact}: $S_H(f_k)$ estimated by averaging 100\,000
+  Monte Carlo fGn periodograms (Wood--Chan simulation, cached to disk).
+ \item \textbf{Asymptotic}: $S_H^{\mathrm{asymp}}(f_k) = C|f_k|^{1-2H}$
+  normalised to the same total power as the exact target.
+\end{enumerate}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\textwidth]{psd_comparison}
+ \caption{%
+  \textbf{Exact vs.\ asymptotic fGn spectral density, $H=0.1$.}
+  \emph{Main panel:} log--log plot of the exact Monte Carlo PSD
+  (blue, averaged over $10^5$ Wood--Chan paths) and the asymptotic
+  power-law $C|f|^{1-2H}$ (orange, normalised to equal total power).
+  The two targets agree in slope but diverge in amplitude across the
+  full frequency range.
+  \emph{Inset:} relative error $(S_{\mathrm{exact}}-S_{\mathrm{asymp}})/S_{\mathrm{exact}}$;
+  the asymptotic target over-estimates power at mid-frequencies by
+  up to 15\%, which biases long-maturity option prices
+  (see Table~\ref{tab:iv-rmse} and \cref{fig:iv-surrogate}).
+ }
+ \label{fig:psd-comparison}
+\end{figure}
+
+\subsection{Variance path generation}
+
+Given trained fGn increments $\Delta W = f_\theta(z)$, construct:
+\begin{align}
+ \hat{W}_t &= \sum_{k : t_k \leq t} \Delta W_k \quad \text{(fBm approximation)}, \\
+ \hat{V}_t &= \xi_0 \exp\!\Bigl(\eta \hat{W}_t
+  - \tfrac{1}{2}\eta^2 \widehat{\mathrm{Var}}[\hat{W}_t]\Bigr),
+ \label{eq:vhat}
+\end{align}
+where $\widehat{\mathrm{Var}}[\hat{W}_t]$ is the cross-sectional
+empirical variance of $\hat{W}_t$ across the batch. This ensures
+$\E[\hat{V}_t] = \xi_0$ for any surrogate whose paths may not have
+exactly the right total variance.
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Convergence Theory}
+\label{sec:theory}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\subsection{Assumptions}
+
+\begin{assumption}[Stationary increments]\label{ass:si}
+ Both $u_\theta$ and $u_{\mathrm{ref}}$ are centred Gaussian processes
+ on $[0,T]$ with stationary increments; they admit the Cramér
+ representation \eqref{eq:cramer} with spectral densities
+ $S_\theta$ and $S_{\mathrm{ref}}$, respectively.
+\end{assumption}
+
+\begin{assumption}[Spectral non-degeneracy]\label{ass:nd}
+ There exist $0 < \omega_0 < \Omega < \infty$ and $\mu_{\min} > 0$
+ such that $S_i(\omega) \geq \mu_{\min}$ for $\omega \in
+ [\omega_0,\Omega]$, $i \in \{\theta, \mathrm{ref}\}$.
+\end{assumption}
+
+\begin{assumption}[Training tolerance]\label{ass:tol}
+ The spectral loss satisfies $\mathcal{L}(\theta) \leq \varepsilon$.
+\end{assumption}
+
+\begin{assumption}[Gaussianity]\label{ass:gauss}
+ $u_{\mathrm{ref}}$ is a Gaussian process (satisfied by fBm).
+\end{assumption}
+
+\subsection{Main theorem}
+
+\begin{theorem}[Cramér PINN convergence]\label{thm:main}
+ Under Assumptions~\ref{ass:si}--\ref{ass:gauss},
+ \begin{equation}
+  W_2\!\bigl(\mathcal{L}(u_\theta),\,\mathcal{L}(u_{\mathrm{ref}})\bigr)
+  \;\leq\;
+  \underbrace{\frac{C_T}{\mu_{\min}^{1/2}}
+  \bigl\|S_\theta - S_{\mathrm{ref}}\bigr\|_{L^2([\omega_0,\Omega])}}_{\text{spectral term}}
+  +
+  \underbrace{C_2\,N_s^{-\beta_H}}_{\text{discretisation}}
+  +
+  \underbrace{C_3\,\omega_0^{-(1-2H)/2}}_{\text{cutoff}},
+  \label{eq:main-bound}
+ \end{equation}
+ where $C_T = T/(2\sqrt{2\pi})$, $\beta_H = \frac{1}{2}\min(H - 1/2 + d/2, 1)$,
+ and $N_s$ is the number of spectral collocation points.
+\end{theorem}
+
+\begin{proof}[Proof sketch]
+ Step 1 (Gelbrich): Gaussian measures on $L^2([0,T])$ satisfy
+ $W_2^2 = \|C_\theta^{1/2} - C_{\mathrm{ref}}^{1/2}\|_\HS^2$
+ (Gelbrich formula \citep{gelbrich1990formula}).
+ Step 2 (Cramér-to-Gelbrich, see Lemma~\ref{lem:cramer-gelbrich}):
+ $W_2^2 \leq \mu_{\min}^{-1/2}\|C_\theta - C_{\mathrm{ref}}\|_\HS$.
+ Step 3 (Parseval): $\|C_\theta - C_{\mathrm{ref}}\|_\HS^2 \leq
+ T^2 \|S_\theta - S_{\mathrm{ref}}\|_{L^2}^2$.
+ The discretisation and cutoff terms follow by standard quadrature
+ bounds (cf.\ \citet{TODO-paper1}, Appendix~A).
+\end{proof}
+
+\subsection{Cramér-to-Gelbrich lemma}
+
+\begin{lemma}[Cramér-to-Gelbrich]\label{lem:cramer-gelbrich}
+ Under Assumptions~\ref{ass:si}--\ref{ass:nd},
+ \[
+  W_2\!\bigl(\mathcal{L}(u_1), \mathcal{L}(u_2)\bigr)
+  \;\leq\;
+  \frac{T}{2\sqrt{2\pi}\,\mu_{\min}^{1/2}}
+  \bigl\|S_1 - S_2\bigr\|_{L^2([\omega_0,\Omega])}.
+ \]
+\end{lemma}
+
+\begin{proof}
+ See \texttt{cramer\_gelbrich.tex} for the full proof. The argument
+ follows three steps: (i) Gelbrich formula for Gaussian measures on
+ $L^2([0,T])$; (ii) operator square-root Lipschitz bound on operators
+ bounded below by $\mu_{\min}$; (iii) Parseval's identity applied to
+ the Cramér kernel $\Delta K(t,s) = \int (e^{i\omega t}-1)
+ \overline{(e^{i\omega s}-1)} (S_1-S_2)(\omega)\,\mathrm{d}\omega$.
+\end{proof}
+
+\subsection{Hurst exponent consistency}
+
+\begin{corollary}[Hurst recovery]\label{cor:hurst}
+ If $\mathcal{L}(\theta) \leq \varepsilon$ and $u_{\mathrm{ref}}$
+ has the power-law PSD $S_H(f) = C_H|f|^{1-2H}$, then the
+ log-log OLS Hurst estimator $\hat{H}$ applied to $u_\theta$
+ satisfies
+ \[
+  |\hat{H}(u_\theta) - H| \;\leq\; C_{\mathrm{OLS}}\sqrt{\varepsilon},
+ \]
+ where $C_{\mathrm{OLS}}$ depends on $[\omega_0, \Omega]$ but not on $\theta$.
+\end{corollary}
+
+\begin{proof}
+ The proof is direct and does not invoke Theorem~\ref{thm:main}.
+
+ \emph{Step 1 (Spectral control).}
+ Since $S_H \leq M_{\max}$ on $[\omega_0,\Omega]$, the log-to-linear
+ lemma \citep[Lemma~A.2]{TODO-paper1} gives
+ $\|S_\theta - S_H\|_{L^2([\omega_0,\Omega])} \leq C_1\sqrt{\varepsilon}$.
+
+ \emph{Step 2 (Variogram Parseval).}
+ By the Cram\'er representation,
+ $V(\tau) = \int|e^{i\omega\tau}-1|^2S(\omega)\,\mathrm{d}\omega$.
+ Splitting at $\omega_0$ and applying Cauchy--Schwarz with
+ $|e^{i\omega\tau}-1|^2\leq 4$:
+ \[
+  |V_\theta(\tau) - V_H(\tau)|
+  \;\leq\; 4\sqrt{\Omega-\omega_0}\cdot C_1\sqrt{\varepsilon}
+  + \tfrac{2C_H}{1-H}\,\omega_0^{2-2H}.
+ \]
+
+ \emph{Step 3 (OLS sensitivity).}
+ The log-log OLS slope is Lipschitz in $\log V$: with weights
+ $w_j = \log\tau_j - \bar{\ell}$ and
+ $V_{\min} = c_H\tau_{\min}^{2H}$,
+ \[
+  |\hat H(u_\theta) - H|
+  \;\leq\; \frac{\sum_j|w_j|}{V_{\min}\,\sum_j w_j^2}
+   \cdot \max_j|V_\theta(\tau_j)-V_H(\tau_j)|.
+ \]
+ Substituting Step~2 and choosing
+ $\omega_0 = O(\varepsilon^{1/(2-2H)})$ to absorb the tail term gives
+ $|\hat H(u_\theta) - H| \leq C_{\mathrm{OLS}}\sqrt{\varepsilon}$
+ with
+ \[
+  C_{\mathrm{OLS}} = \frac{4C_1\sqrt{\Omega-\omega_0}\,\sum_j|w_j|}
+   {c_H\,\tau_{\min}^{2H}\,\sum_j w_j^2}.
+ \]
+ Full details and explicit constants in \texttt{cramer\_gelbrich.tex}.
+\end{proof}
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Experiments}
+\label{sec:experiments}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\subsection{Setup}
+
+\paragraph{Model parameters.}
+We use the rough Bergomi model \eqref{eq:rbergomi} with parameters
+from \citet{gatheral2018volatility,bayer2016pricing}:
+$H = 0.1$, $\eta = 1.9$, $\xi_0 = 0.04$ (initial vol 20\%),
+$\rho = 0$ (leverage effect studied in \cref{sec:greeks}).
+Time horizon $T = 1$ year, $N = 252$ daily steps.
+
+\paragraph{Reference simulation.}
+$10{,}000$ variance paths from Wood--Chan exact fBm simulation
+\citep{wood1994simulation}, stock paths from Euler--Maruyama.
+
+\paragraph{Surrogates.}
+Three models trained for 3000 epochs on CPU (Adam, cosine LR schedule):
+SpectralFilter (exact PSD), SpectralFilter (asymptotic PSD),
+BochnerMLP (exact PSD).
+
+\subsection{Hurst exponent recovery}
+
+\begin{table}[h]
+\centering
+\caption{Hurst exponent recovery (structure function estimator),
+Hurst sweep $H \in \{0.05, 0.10, 0.15, 0.20, 0.30, 0.50\}$.
+SpectralFilter, 2000 epochs, smart initialisation.}
+\label{tab:hurst}
+\begin{tabular}{crrr}
+\toprule
+$H_{\mathrm{true}}$ & $\hat{H}_{\mathrm{exact}}$
+ & $\hat{H}_{\mathrm{asymp}}$ & $\Delta H_{\mathrm{exact}}$ \\
+\midrule
+0.05 & 0.063 & 0.142 & $+0.013$ \\
+0.10 & 0.109 & 0.171 & $+0.009$ \\
+0.15 & 0.155 & 0.202 & $+0.005$ \\
+0.20 & 0.201 & 0.237 & $+0.001$ \\
+0.30 & 0.293 & 0.311 & $-0.007$ \\
+0.50 & 0.473 & 0.471 & $-0.027$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Exact PSD training recovers $H$ with error $|\Delta H| \leq 0.013$
+across all tested values. The asymptotic target systematically
+over-estimates $H$ for $H \leq 0.3$ (bias up to $0.092$ for $H = 0.05$).
+The $H = 0.5$ residual error ($-0.027$) is a finite-$N$ structural
+artefact from the circulant periodicity and is the same for both targets.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=0.62\textwidth]{hurst_recovery}
+ \caption{%
+  \textbf{Hurst exponent recovery.}
+  Estimated $\hat{H}$ (structure-function OLS) vs.\ true $H$
+  for the SpectralFilter trained on exact (blue) and asymptotic (orange)
+  PSD targets. The diagonal (dashed) is perfect recovery.
+  Exact PSD training lies within $|\Delta H| \leq 0.013$ of the diagonal
+  across the full rough-vol range $H \in [0.05, 0.50]$.
+  The asymptotic target systematically over-estimates $H$ for $H \leq 0.3$
+  (bias up to $+0.09$ at $H=0.05$), consistent with Corollary~\ref{cor:hurst}
+  and the mid-frequency PSD mis-match in Figure~\ref{fig:psd-comparison}.
+ }
+ \label{fig:hurst-recovery}
+\end{figure}
+
+\begin{remark}[Filter geometry: Bochner loss does not recover the Cholesky factor]
+\label{rem:filter-geometry}
+The SpectralFilter's learnable log-amplitudes $a_k$ do not converge to
+the exact Cholesky factor $\tfrac{1}{2}\log(S_H(f_k)\cdot N/(2\,\mathrm{d}t))$
+of the fGn covariance matrix.  Training filters at $H \in \{0.05, 0.10, 0.30\}$
+on the exact fGn PSD and comparing the learned $a_k$ to the theoretical
+Cholesky factor gives $\max_k|\Delta a_k| = 2.77$ in all cases
+(Figure~\ref{fig:filter-geometry}).  The Bochner loss constrains the
+\emph{expected} PSD of the output; many filter configurations satisfy
+this in expectation without matching the per-frequency Cholesky amplitude.
+Theorem~\ref{thm:main} is therefore a \emph{distributional} result:
+the surrogate law converges to the reference law in $W_2$ but the filter
+weights need not be the spectral Cholesky factor.
+\end{remark}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=\textwidth]{filter_geometry}
+ \caption{%
+  \textbf{Learned log-amplitude vs.\ theoretical Cholesky factor.}
+  Blue: SpectralFilter learned $a_k$ after 3000 epochs.
+  Orange: exact Cholesky factor $\tfrac{1}{2}\log(S_H(f_k)\cdot N/(2\,\mathrm{d}t))$.
+  The maximum per-frequency gap $\max_k|\Delta a_k| = 2.77$ is identical
+  for $H \in \{0.05, 0.10, 0.30\}$: the Bochner loss has a large solution
+  manifold and the gradient descent finds a solution that satisfies the
+  PSD constraint in expectation without converging to the Cholesky factor.
+ }
+ \label{fig:filter-geometry}
+\end{figure}
+
+\subsection{Hurst estimator comparison}
+\label{sec:hurst-estimators}
+
+We compare four estimators applied to $300$ SpectralFilter paths
+($N=252$, $H \in \{0.05, 0.10, 0.20, 0.30\}$; same filter as
+§\ref{sec:experiments}):
+\begin{enumerate}[nosep,label=(\roman*)]
+ \item \textbf{Structure function}: log-log OLS on
+       $\mathbb{E}[(W_{t+\tau}-W_t)^2] \sim \tau^{2H}$; used throughout
+       this paper.
+ \item \textbf{PSD slope}: log-log OLS on the empirical PSD, fitting
+       $\hat{S}(f) \sim f^{1-2H}$.
+ \item \textbf{R/S analysis}: Hurst's rescaled-range,
+       $\mathbb{E}[R(n)/S(n)] \sim n^H$.
+ \item \textbf{Cram\'er exact}: grid-search
+       $\hat{H}=\operatorname{arg\,min}_{H'}\|\log\hat{S}_\mathrm{emp}
+       -\log S_{H'}\|^2$ over a pre-built grid
+       $H' \in [0.02, 0.48]$ (step $0.01$, $10^4$ paths per node).
+\end{enumerate}
+
+\begin{table}[h]
+\centering
+\caption{Hurst estimator comparison: bias and standard deviation
+($N=252$, 300~paths per $H$).
+Structure function achieves smallest absolute bias ($|\text{bias}|\leq 0.011$
+for $H\leq 0.30$).
+Cram\'er exact achieves tightest standard deviation ($0.012$, nearly constant).
+PSD slope and R/S are unreliable for rough vol: PSD slope incurs severe
+negative bias at small $H$ ($-0.195$ at $H=0.05$); R/S has a large
+positive bias ($+0.20$) uniform in $H$.}
+\label{tab:hurst-estimators}
+\begin{tabular}{lcccccccc}
+\toprule
+ & \multicolumn{2}{c}{$H=0.05$} & \multicolumn{2}{c}{$H=0.10$}
+ & \multicolumn{2}{c}{$H=0.20$} & \multicolumn{2}{c}{$H=0.30$} \\
+\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}
+Estimator & Bias & Std & Bias & Std & Bias & Std & Bias & Std \\
+\midrule
+Struct.\ function & $-0.002$ & $0.018$ & $-0.002$ & $0.028$ & $-0.006$ & $0.042$ & $-0.011$ & $0.052$ \\
+PSD slope         & $-0.195$ & $0.159$ & $-0.120$ & $0.161$ & $-0.065$ & $0.162$ & $-0.007$ & $0.159$ \\
+R/S               & $+0.208$ & $0.032$ & $+0.200$ & $0.037$ & $+0.173$ & $0.039$ & $+0.151$ & $0.047$ \\
+Cram\'er exact    & $+0.055$ & $0.012$ & $+0.056$ & $0.012$ & $+0.055$ & $0.012$ & $+0.053$ & $0.011$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=\textwidth]{hurst_estimator_comparison}
+ \caption{%
+  \textbf{Hurst estimator comparison.}
+  Violin plots of $\hat{H}$ across 300 paths for each method.
+  Structure function (blue) tracks the diagonal closely with small
+  variance.  Cram\'er exact (green) is tightest but has a
+  $+0.055$ positive bias from the finite-$N$ frequency cutoff.
+  PSD slope (orange) collapses near zero for $H\leq 0.10$;
+  R/S (red) overshoots by $+0.20$ uniformly.
+ }
+ \label{fig:hurst-estimators}
+\end{figure}
+
+The Cram\'er exact estimator has a systematic $+0.055$ positive bias
+at all $H$, arising from the finite-$N$ frequency grid: the minimum
+observable frequency $f_\mathrm{min} = 1/T = 1$~yr$^{-1}$ sits above
+the low-frequency divergence of the fGn PSD, so the grid search finds
+a slightly higher $H'$ to compensate for missing low-frequency energy.
+A simple bias correction of $-0.055$ matches structure-function accuracy
+while retaining the tighter standard deviation.
+
+\textbf{Recommendation.} For rough vol ($H \in [0.05, 0.15]$) use the
+structure function (smallest MAE).  PSD slope and R/S should \emph{not}
+be used below $H < 0.2$: at $H=0.05$ both misestimate by multiples of
+the true value.  The Cram\'er exact estimator provides the tightest
+posterior (std~$=0.012$) and is the most robust to outlier paths, making
+it preferable when a confidence interval on $H$ is required.
+
+\subsection{Implied volatility surface}
+
+\begin{table}[h]
+\centering
+\caption{IV surface RMSE (vol points) vs.\ MC reference.
+Strikes $K/S_0 \in \{0.80, \ldots, 1.20\}$, maturities $T \in
+\{0.25, 0.50, 1.00\}$. MC noise floor $\approx 1.0$~vp (10k paths).
+Primary calibration: $H=0.1$, $\eta=1.9$, $\xi_0=0.04$.}
+\label{tab:iv-rmse}
+\begin{tabular}{lrrrr}
+\toprule
+Model & Overall & $T=0.25$ & $T=0.50$ & $T=1.00$ \\
+\midrule
+\multicolumn{5}{c}{\textit{$H=0.10$, $\eta=1.9$, $\xi_0=0.04$ (baseline)}} \\
+SpectralFilter (exact PSD) & 1.33 & 1.16 & 0.66 & 1.89 \\
+SpectralFilter (asymptotic) & 2.27 & 1.41 & 1.79 & 3.20 \\
+BochnerMLP (exact PSD)   & \textbf{1.21} & 1.28 & 1.12 & \textbf{1.23} \\
+\midrule
+\multicolumn{5}{c}{\textit{$H=0.05$, $\eta=1.9$, $\xi_0=0.04$ (extreme roughness)}} \\
+SpectralFilter (exact PSD) & \textbf{1.61} & \textbf{1.79} & \textbf{0.77} & \textbf{2.01} \\
+SpectralFilter (asymptotic) & 2.89 & 1.94 & 2.29 & 4.01 \\
+BochnerMLP (exact PSD)   & 2.03 & 2.13 & 1.82 & 2.13 \\
+\midrule
+\multicolumn{5}{c}{\textit{$H=0.10$, $\eta=1.5$, $\xi_0=0.04$ (mild vol-of-vol)}} \\
+SpectralFilter (exact PSD) & 1.08 & 1.10 & 0.52 & 1.43 \\
+SpectralFilter (asymptotic) & 1.64 & 1.00 & 1.26 & 2.34 \\
+BochnerMLP (exact PSD)   & \textbf{0.61} & \textbf{0.60} & \textbf{0.53} & \textbf{0.69} \\
+\midrule
+MC noise floor ($10$k paths) & $\approx 1.0$ &  &  &  \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The exact PSD target yields a 1.7$\times$ lower overall RMSE than the
+asymptotic approximation at the baseline parameters. The gap grows with
+maturity: at $T=1$ the asymptotic model is $1.7\times$ worse (3.20 vs.\
+1.89~vp). At extreme roughness ($H=0.05$) the gap widens further:
+SpectralFilter~(asymptotic) reaches 4.01~vp at $T=1$ while the exact
+target holds at 2.01~vp ($2\times$ better), confirming that the
+power-law approximation is least accurate at mid-frequencies for small $H$.
+Notably, at $H=0.05$ the SpectralFilter~(exact) outperforms the BochnerMLP
+(1.61 vs.\ 2.03~vp overall): the nonlinear MLP struggles to match the
+sharp roughness of extreme-$H$ paths, while the linear spectral filter is
+optimal by construction. At lower vol-of-vol ($\eta=1.5$) the BochnerMLP
+recovers strongly to 0.61~vp overall, below the 1.0~vp MC noise floor --
+confirming that the spectral loss is architecture-agnostic and remains
+effective across the calibrated parameter range.
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\textwidth]{iv_surrogate_panel}
+ \caption{%
+  \textbf{Implied volatility smiles: MC reference vs.\ surrogates.}
+  Each panel shows one maturity ($T \in \{0.25, 0.50, 1.00\}$);
+  $x$-axis is moneyness $K/S_0$, $y$-axis is IV in \%.
+  RMSE (vol points) relative to the MC reference is shown in the
+  legend.
+  SpectralFilter (exact PSD) tracks the reference closely at all
+  maturities; SpectralFilter (asymptotic) incurs a systematic
+  upward bias at $T=1.00$ (3.20~vp), where the mid-frequency
+  PSD mis-match propagates to long-dated smile levels.
+  BochnerMLP achieves the lowest per-maturity RMSE despite generating
+  non-Gaussian paths, confirming that the spectral loss is
+  architecture-agnostic.
+ }
+ \label{fig:iv-surrogate}
+\end{figure}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\textwidth]{rmse_heatmap}
+ \caption{%
+  \textbf{IV RMSE (vol points) by strike and maturity.}
+  Colour scale: green $=$ low error, red $=$ high error.
+  Each cell shows RMSE relative to the 10k-path MC reference.
+  SpectralFilter (exact PSD) and BochnerMLP maintain near-uniform
+  low error across the entire strike--maturity grid.
+  SpectralFilter (asymptotic) shows a concentrated error mass at
+  long maturities ($T=1.00$) and deep OTM puts ($K/S_0 \leq 0.85$),
+  precisely the region where the power-law PSD approximation is
+  least accurate.
+ }
+ \label{fig:rmse-heatmap}
+\end{figure}
+
+\paragraph{PSD phase diagram.}
+Figure~\ref{fig:psd-phase} quantifies the transition from exact-critical
+to asymptotic-adequate regimes.  The relative $L^2(\log)$ PSD distance
+between exact and asymptotic targets decreases monotonically with $H$
+(from $0.072$ at $H=0.05$ to $0.011$ at $H=0.30$), consistent with
+the power-law approximation becoming accurate as the PSD singularity
+weakens.  The IV RMSE gap (exact vs.\ asymptotic) mirrors this:
+$0.76$~vp gap at $H=0.05$, shrinking to $1.28$~vp gap at $H=0.30$
+in the opposite direction (asymptotic actually deteriorates for large
+$H$ where the filter overfits to the flat high-frequency region).
+The critical threshold is $H \approx 0.15$, below which exact PSD
+training is essential; above $H=0.20$ both targets yield comparable accuracy.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=\textwidth]{psd_phase_diagram}
+ \caption{%
+  \textbf{PSD phase diagram.}
+  Left: relative $L^2(\log)$ distance between exact and asymptotic fGn PSD
+  as a function of $H$.  Right: IV RMSE vs.\ MC reference for SpectralFilter
+  trained on exact (blue) and asymptotic (orange) PSD.
+  Below $H \approx 0.15$ (shaded) the exact target is essential;
+  above $H = 0.20$ both targets achieve comparable accuracy.
+  Baseline parameters: $\eta=1.9$, $\xi_0=0.04$, $\rho=0$, $N=252$.
+ }
+ \label{fig:psd-phase}
+\end{figure}
+
+\subsection{Observation-horizon sensitivity}
+\label{sec:horizon}
+
+The minimum observable frequency in the training PSD is
+$f_\mathrm{min} = 1/T$, so longer horizons resolve more of the
+low-frequency region near the fGn PSD singularity.  We sweep
+$T \in \{0.5, 1, 2, 5\}$~years at fixed $H=0.1$,
+$\Delta t = 1/252$, using $N = \lfloor T\times 252\rfloor$ steps
+and evaluating IV RMSE at terminal maturity $T$.
+
+\begin{table}[h]
+\centering
+\caption{Observation-horizon sensitivity ($H=0.1$, $\Delta t=1/252$,
+3 evaluation seeds).  IV RMSE at terminal maturity $T$;
+$|\Delta H|$ from structure-function estimator.
+Surrogate performs well for $T\leq 2$~yr; IV RMSE spikes at
+$T=5$~yr due to the amplified low-frequency cutoff penalty
+$C_3\omega_0^{-(1-2H)/2}$ (Theorem~\ref{thm:main}) and the
+reduced MC budget at large $N$.}
+\label{tab:horizon-sweep}
+\begin{tabular}{lrrrc}
+\toprule
+$T$ (yr) & $N$ & $f_\mathrm{min}$ (Hz) & $|\Delta H|$ & IV RMSE (vp) \\
+\midrule
+0.5 & 126  & 2.000 & $0.010$ & $1.36\pm 0.34$ \\
+1.0 & 252  & 1.000 & $0.010$ & $1.57\pm 0.39$ \\
+2.0 & 504  & 0.500 & $0.006$ & $1.32\pm 0.75$ \\
+5.0 & 1260 & 0.200 & $0.003$ & $3.72\pm 1.03$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=\textwidth]{horizon_sweep}
+ \caption{%
+  \textbf{Horizon sensitivity.}
+  Left: mean absolute Hurst estimation error $|\hat H - H|$ vs.\ horizon $T$.
+  Right: IV RMSE at terminal maturity vs.\ $T$.
+  Hurst error decreases monotonically with $T$ (more data $\Rightarrow$ better
+  frequency resolution).  IV RMSE is non-monotone: it stays low for
+  $T\leq 2$~yr and spikes at $T=5$~yr, where the low-frequency singularity
+  degrades the PSD fit.
+ }
+ \label{fig:horizon-sweep}
+\end{figure}
+
+Two effects compete as $T$ grows.  Longer horizons reduce $|\Delta H|$
+monotonically ($0.010 \to 0.003$), consistent with Corollary~\ref{cor:hurst}.
+But they also move $f_\mathrm{min}$ closer to the PSD singularity at $f=0$,
+amplifying the cutoff term $C_3\omega_0^{-(1-2H)/2}$ in
+Theorem~\ref{thm:main}.  At $T=5$~yr the IV RMSE spikes to
+$3.72\pm 1.03$~vp, with large cross-seed variance signalling instability
+in the low-frequency PSD fit.  We therefore recommend the Cramér PINN for
+$T\leq 2$~yr, where IV RMSE stays below $1.6$~vp at the primary calibration
+($H=0.1$, $\eta=1.9$).
+
+\subsection{Runtime comparison}
+
+\begin{table}[h]
+\centering
+\caption{Wall-clock time for generating $10{,}000$ variance paths
+($N=252$, $T=1$ year). Surrogates benchmarked on NVIDIA GTX~950 (2~GB);
+Wood--Chan runs on CPU (single core).
+Training cost amortised over $10^6$ generated paths (${}^\dagger$estimated).}
+\label{tab:timing}
+\begin{tabular}{lrrr}
+\toprule
+Method & Train (s) & Gen $10$k (ms) & Amort.\ $10^6$ (ms/10k) \\
+\midrule
+Wood--Chan (exact fBm)   &  & 365  & 365   \\
+Bennedsen hybrid scheme   &  & ${}^\dagger$200 & ${}^\dagger$200 \\
+SpectralFilter (exact PSD) & 5.7 & 0.26 & 57   \\
+SpectralFilter (asymptotic) & 5.7 & 0.26 & 57   \\
+BochnerMLP (exact PSD)   & 6.5 & 0.17 & 66   \\
+\midrule
+3-factor Markovian Bergomi &  & ${}^\dagger$30 & ${}^\dagger$30 \\
+Lifted Heston ($n=5$ factors)&  & ${}^\dagger$10 & ${}^\dagger$10 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Training is a one-time cost; amortised over $10^6$ paths the spectral
+surrogates generate each batch of $10{,}000$ paths in under 1\% of the
+Wood--Chan time. At $10^7$ paths (deep hedging scale), the amortised
+cost falls to $\approx 6$~ms/10k for SpectralFilter, a $60\times$
+wall-clock speedup over exact fBm simulation. SpectralFilter generates
+paths via a single RFFT/IRFFT round-trip; BochnerMLP uses a forward pass
+through a 35k-parameter MLP, which on GPU is slightly faster than the FFT
+chain due to fused matrix-multiply kernels.
+
+\paragraph{Reference IV surface ($H=0.1$, $\rho=0$).}
+\begin{center}
+\begin{tabular}{lrrrrrrrrr}
+\toprule
+$T \backslash K/S_0$ & 0.80 & 0.85 & 0.90 & 0.95 & 1.00 & 1.05 & 1.10 & 1.15 & 1.20 \\
+\midrule
+0.25 & 25.9 & 22.8 & 20.1 & 18.1 & 17.2 & 18.0 & 19.6 & 21.4 & 23.3 \\
+0.50 & 23.2 & 20.8 & 18.8 & 17.3 & 16.8 & 17.4 & 18.6 & 19.9 & 21.2 \\
+1.00 & 22.6 & 20.6 & 19.0 & 17.9 & 17.4 & 17.7 & 18.5 & 19.5 & 20.5 \\
+\bottomrule
+\end{tabular}
+\end{center}
+IV in \%. ATM vol $\approx 17\%$ (slightly below $\sqrt{\xi_0} = 20\%$
+due to Euler--Maruyama discretisation bias). Smile is bowl-shaped and
+symmetric (expected for $\rho=0$); term structure nearly flat.
+
+\subsection{CausalSpectralFilter: supporting $\rho \neq 0$}
+\label{sec:causal}
+% ═════════════════════════════════════════════════════════════════════════════
+
+The experiments in \cref{sec:greeks} establish that the irreducible
+$-0.27$ delta bias originates from missing the joint $(V,S)$ law. A
+natural prior question is whether the spectral surrogate can at least
+\emph{encode} $\rho \neq 0$ correctly within rBergomi, so that the
+leverage channel is present even if the exact $S$--$V$ law is not matched.
+
+\paragraph{Setup: $z$-Cholesky and the BLP reference.}
+The \emph{$z$-Cholesky} approach reuses the filter's i.i.d.\ input noise
+$z \sim \mathcal{N}(0,I)$ as the stock BM driver:
+\begin{equation}
+ d\!\log S_k
+  = -\tfrac{1}{2}V_k\,dt
+   + \sqrt{V_k\,dt}\,\bigl(\rho\,z_k + \sqrt{1-\rho^2}\,z_k^\perp\bigr).
+ \label{eq:z-cholesky}
+\end{equation}
+The ground truth is an RL-discretised rBergomi path with $\rho = -0.9$,
+simulated via the \emph{BLP hybrid scheme} \citep{bennedsen2017hybrid}
+(same Volterra kernel as \cref{sec:greeks}, now applied to rBergomi).
+The BLP reference produces a left-skewed IV surface (ATM $\approx 15\%$
+at $T=0.25$, declining to $9\%$ at $K/S_0 = 1.10$) and ATM delta
+$0.67$--$0.71$, consistent with the leverage effect.
+
+\paragraph{Circular filter: catastrophic failure.}
+Applying \eqref{eq:z-cholesky} to the circular SpectralFilter gives an
+IV RMSE of $204$~vp and ATM deltas rising from $1.07$ to $1.90$ --
+physically impossible for European calls. The mechanism is
+\emph{non-causality of the circular FFT}. The filter computes
+\[
+ \Delta\hat{W}_k
+  = \bigl[\mathrm{IRFFT}\!\bigl(\tilde{H}\cdot\mathrm{RFFT}(z)\bigr)\bigr]_k,
+\]
+a circular convolution over the \emph{entire} horizon $N$. Consequently
+$V_k = \xi_0 e^{\eta\hat{W}_k - \cdots}$ depends on future innovations
+$z_{k+1},\ldots,z_{N-1}$ through the circular wrap-around, so $V_k$ and
+$d\!\log S_{k+j}$ are spuriously correlated forward in time, violating
+the martingale condition.
+
+\paragraph{CausalSpectralFilter: architecture and initialisation.}
+We replace the circular FFT with a causal lower-triangular Toeplitz
+convolution:
+\begin{equation}
+ \Delta\hat{W}_k = \sum_{j=0}^{k} h_{k-j}\,z_j,
+ \label{eq:causal-filter}
+\end{equation}
+where $h \in \mathbb{R}^N$ is a learnable real impulse response.
+Because output at step $k$ depends only on $z_0,\ldots,z_k$, we have
+$V_k \perp z_k$ and \eqref{eq:z-cholesky} is mathematically valid.
+We implement \eqref{eq:causal-filter} as a single \texttt{F.conv1d}
+with $(N-1)$ left-zero-padding, costing one matrix–vector product per
+forward pass.
+
+Initialisation uses the Riemann--Liouville increment kernel:
+\begin{equation}
+ h_0 = \frac{dt^H}{\Gamma(H+\tfrac{1}{2})},
+ \qquad
+ h_m = \frac{dt^H\bigl(g(m+1)-g(m)\bigr)}{\Gamma(H+\tfrac{1}{2})},
+ \quad m \geq 1,
+ \label{eq:rl-init}
+\end{equation}
+where $g(i)=i^{H-1/2}$. For $H < \tfrac{1}{2}$, $h_m < 0$ for $m \geq 1$
+(roughness is encoded as negative memory in the innovations). We then
+fine-tune with the same Bochner PSD loss used throughout, reaching a
+final log-PSD MSE of $0.019$ (vs.\ $0.017$ for the circular filter) in
+$3\,000$ epochs. The CausalSpectralFilter has $N = 252$ parameters
+(vs.\ $N/2 = 126$ for the circular architecture) and an inference cost
+of $12.6$~ms per $10\,000$ paths (vs.\ $1.9$~ms for the circular FFT)
+on the same GTX 950 GPU, a $6.7\times$ slowdown that remains
+$29\times$ faster than the Wood--Chan reference simulator. Hurst
+recovery via structure function is preserved
+($|\hat{H}-H| = 0.003$ for causal vs.\ $0.009$ for circular, both well
+within the $\sqrt{\varepsilon}$ bound of \cref{cor:hurst}).
+
+\paragraph{Results.}
+Table~\ref{tab:causal-blp} and Figure~\ref{fig:causal-iv} summarise.
+The causal filter with $z$-Cholesky achieves an IV RMSE of
+\textbf{3.26~vp}, a \textbf{63$\times$ improvement} over the circular
+architecture and better than the $\rho=0$ causal baseline (6.8~vp).
+All ATM deltas are in $[0,1]$; the ATM bias shrinks from $-0.17$
+($\rho=0$ baseline) to $-0.07$ ($z$-Cholesky), recovering $\sim\!60\%$
+of the leverage-effect contribution.
+
+\begin{table}[h]
+\centering
+\caption{IV RMSE vs BLP rBergomi reference ($\rho=-0.9$, 8k paths each)
+and ATM $\Delta$ at $T=0.50$. Causal $z$-Cholesky is 63$\times$ better
+than the circular architecture and reduces the delta bias by 60\% vs.\
+the $\rho=0$ baseline.}
+\label{tab:causal-blp}
+\begin{tabular}{lrrrr}
+\toprule
+Condition & \multicolumn{3}{c}{IV RMSE (vp) per maturity} & ATM $\Delta$ \\
+     & $T=0.25$ & $T=0.50$ & $T=1.00$ & $T=0.50$ \\
+\midrule
+BLP reference ($\rho=-0.9$)      &   &   &   & 0.689 \\
+Circular SF  z-Cholesky ($\rho=-0.9$) & 57.7 & 89.8 & 359.6 & $>1$ \\
+Causal SF   baseline  ($\rho=0$)  & 7.6 & 7.5 &  5.3 & 0.517 \\
+Causal SF   z-Cholesky ($\rho=-0.9$) & \textbf{4.1} & \textbf{3.7} & \textbf{1.4} & \textbf{0.620} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[t]
+ \centering
+ \includegraphics[width=\textwidth]{causal_filter_comparison}
+ \caption{%
+  \textbf{CausalSpectralFilter vs circular SpectralFilter ($\rho=-0.9$).}
+  Each panel shows one maturity.
+  BLP reference (black) has the correct left skew.
+  Causal $z$-Cholesky (green dashed) tracks the reference closely at
+  all strikes; causal $\rho=0$ baseline (blue dotted) matches the IV
+  \emph{level} but not the skew. Circular $z$-Cholesky (red
+  dash-dot) is physically invalid (IVs exceed 100\% and deltas $>1$
+  at long maturities, not shown on this scale).
+ }
+ \label{fig:causal-iv}
+\end{figure}
+
+\paragraph{Robustness across $H$.}
+The improvement is not specific to $H = 0.1$.
+Table~\ref{tab:causal-hurst} reports the sweep across the typical
+rough-vol range $H \in \{0.05, 0.10, 0.15\}$. The causal $z$-Cholesky
+IV RMSE stays in $[2.4, 3.5]$~vp across all $H$, while the circular
+baseline exceeds $100$~vp at every $H$. The improvement factor
+varies between $29\times$ and $60\times$, peaking at $H=0.1$ where the
+circular failure is most severe. ATM delta bias decreases monotonically
+with $H$ (from $-0.076$ at $H=0.05$ to $-0.050$ at $H=0.15$), consistent
+with smoother $V$ paths being easier to match in distribution.
+
+\begin{table}[h]
+\centering
+\caption{CausalSpectralFilter robustness sweep across $H$, all conditions
+at $\rho=-0.9$, 8k paths. IV RMSE in vol points vs BLP reference;
+$\Delta$ bias = $\hat\Delta_{\mathrm{ATM}} - \Delta_{\mathrm{ATM,ref}}$ at $T=0.50$.}
+\label{tab:causal-hurst}
+\begin{tabular}{ccccccc}
+\toprule
+$H$ & Circular SF & Causal SF & Causal SF & Improvement & ATM $\Delta$ bias \\
+  & z-Cholesky & $\rho=0$ & z-Cholesky & factor   & (causal $z$-Chol) \\
+\midrule
+0.05 & 103.0 & 7.10 & 3.54 & $29\times$ & $-0.076$ \\
+0.10 & 204.6 & 6.84 & \textbf{3.41} & $\mathbf{60\times}$ & $-0.073$ \\
+0.15 & 106.1 & 6.83 & 2.39 & $44\times$ & $-0.050$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Closing the residual: matched-PSD training.}
+The remaining $\sim\!-0.07$ delta bias of the causal $z$-Cholesky
+surrogate is attributable to the V-distribution gap between the
+RL-discretised BLP reference and the Wood--Chan-based fGn PSD used in
+training. We test this directly by training a second causal filter on
+the \emph{RL-fBm} PSD (estimated by Monte Carlo from $10^5$ paths of the
+same RL discretisation that drives the reference). Table~\ref{tab:rl-match}
+shows the result:
+
+\begin{table}[h]
+\centering
+\caption{Effect of matching the training PSD to the reference V
+distribution ($H=0.1$, $\rho=-0.9$, 5k surrogate paths). IV RMSE is
+against the BLP reference; bias is
+$\hat\Delta_{\mathrm{ATM}} - \Delta_{\mathrm{ATM,ref}}$. Matching the
+training PSD to the RL-fBm distribution eliminates the residual bias.}
+\label{tab:rl-match}
+\begin{tabular}{lcccc}
+\toprule
+Training PSD & IV RMSE (vp) & Bias $T=0.25$ & Bias $T=0.50$ & Bias $T=1.00$ \\
+\midrule
+Wood--Chan (exact fBm)     & 3.42 & $-0.086$ & $-0.073$ & $-0.058$ \\
+RL-fBm (matched to reference) & \textbf{2.57} & \textbf{$+0.011$} & \textbf{$+0.011$} & \textbf{$-0.007$} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The matched-PSD surrogate achieves $2.57$~vp and an ATM delta bias of
+$\lesssim 0.011$ at all maturities, essentially Monte Carlo noise.
+This confirms the diagnosis: the leverage-channel residual was an
+artefact of the training-vs-reference V-distribution mismatch, not a
+deficiency of the causal architecture. The lesson generalises: for
+any reference simulator, training the causal SpectralFilter on the
+simulator's empirical PSD recovers $\rho \neq 0$ Greeks faithfully.
+
+\paragraph{Two negative results: spectral matching of rough Heston $V$
+makes things worse.}
+We attempted two natural variants of the causal SpectralFilter that
+match rough Heston's $V$ marginal more closely:
+\emph{(i)} train on the PSD of $V_{\mathrm{rH}}-\theta$ and use a linear
+reconstruction $V_{\mathrm{surr}} = \theta + \mathrm{filter}(z)$;
+\emph{(ii)} train on the PSD of $\log V_{\mathrm{rH}}$ and use the
+rBergomi-style exp reconstruction
+$V_{\mathrm{surr}} = \theta \exp(W - \tfrac{1}{2}\mathrm{Var}\,W)$.
+Both \textbf{worsen} the cross-model bias (Table~\ref{tab:rh-negatives}).
+Variant~(i) requires clipping $44\%$ of cells to enforce positivity,
+inflating $\E[V_{\mathrm{surr}}]$ to $0.15$ ($3.7\times$ target).
+Variant~(ii) collapses $\E[V_{\mathrm{surr}}]\to 0.004$ because the
+empirical variance correction is dominated by
+$\mathrm{Var}(d\log V_{\mathrm{rH}}) \approx 62$, log-$V$ excursions
+when $V_{\mathrm{rH}}$ briefly visits very small values.
+
+\begin{table}[h]
+\centering
+\caption{Attempts to match rough Heston $V$ within the spectral framework
+all underperform the rBergomi-$V$ baseline. Spectral surrogates capture
+second-order statistics; rough Heston $V$'s skewness and heavy tails
+require higher-order modelling.}
+\label{tab:rh-negatives}
+\begin{tabular}{lccc}
+\toprule
+Surrogate $V$ design & IV RMSE (vp) & ATM $\Delta(T=.5)$ & Bias \\
+\midrule
+Causal SF, rBergomi $V$ (Surr~D above)       & \textbf{4.57} & \textbf{0.6247} & \textbf{$-0.150$} \\
+Causal SF, linear $V = \theta + \mathrm{filter}(z)$ & 20.4 & 0.456 & $-0.319$ \\
+Causal SF, $\log V$ matched, exp recon       & 9.7 & 0.485 & $-0.290$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Both failures reinforce the diagnosis: rough Heston's $V$ marginal is
+too skewed and heavy-tailed for Gaussian second-order matching, and the
+rBergomi log-normal $V$, \emph{despite a wrong distribution}, is the
+best base process within the spectral family. Closing the remaining
+$-0.15$ bias requires a Volterra-aware (non-spectral) architecture
+that captures rough Heston's mean reversion and tail structure.
+
+\paragraph{Sub-quadratic Volterra updates.}
+The Volterra recursion above is $O(N^2)$ per path because the kernel
+sum at step $k$ uses all of $V_0, \ldots, V_k$. Approximating the RL
+kernel by a sum of $M$ exponentials,
+$w_i \approx \sum_{m=1}^{M} a_m\, r_m^{\,i}$ with $r_m = e^{-\lambda_m}$,
+turns the sum into $M$ recursively updatable states:
+\begin{equation}
+ S_m^X(k) = X_k + r_m\, S_m^X(k-1),
+ \qquad \text{cost: } O(M) \text{ per step.}
+ \label{eq:markov-state}
+\end{equation}
+We fit $(a_m, \lambda_m)$ from the rough-Heston RL kernel by
+geometrically spacing the $\lambda_m$ over $[1/N, 1]$ and solving for
+$a_m$ by nonneg least squares. The resulting
+\emph{MarkovianVolterraSurrogate} has the same V-conditional structure
+\eqref{eq:volterra-surrogate} but $O(MN)$ per path.
+Table~\ref{tab:markov-volterra} shows the sweep:
+
+\begin{table}[h]
+\centering
+\caption{Sub-quadratic Volterra via $M$-mode RL kernel approximation
+($H=0.1$, $N=252$, batch $5\,000$, GPU). $M = 5$ already saturates the
+kernel-fit error ($\approx 4\%$ relative) and gives the best IV-RMSE
+of the sweep, $7\times$ faster than the exact $O(N^2)$ baseline.}
+\label{tab:markov-volterra}
+\begin{tabular}{lcccc}
+\toprule
+Surrogate & Fwd time (ms) & Speedup & IV RMSE (vp) & ATM $\Delta$ bias \\
+\midrule
+$O(N^2)$ Volterra (exact)      & 280 & $1\times$  & 0.91 & $-0.004$ \\
+Markovian, $M=3$           & 47 & $6.0\times$ & 0.76 & $-0.001$ \\
+\textbf{Markovian, $M=5$}      & \textbf{39} & \textbf{$7.2\times$} & \textbf{0.73} & \textbf{$+0.001$} \\
+Markovian, $M=7$           & 40 & $7.1\times$ & 0.88 & $-0.008$ \\
+Markovian, $M=10$          & 40 & $7.1\times$ & 0.85 & $-0.009$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+All Markovian variants match the exact baseline within MC noise; the
+$7\times$ speedup is bounded below by Python loop overhead and would
+grow as $O(N/M)$ for longer time horizons. The Greeks are robust to a
+$4\%$ relative kernel-fit error, a strong empirical indicator that
+sub-quadratic approximations are practically usable.
+
+\paragraph{Non-affine generalisation and full joint training.}
+The diffusion term $\sqrt{V_j}$ in \eqref{eq:volterra-surrogate} is a
+Heston-specific choice ($\sigma(V) = \nu V^{1/2}$). The same
+autoregressive form accepts $\sigma(V) = V^\beta$ with $\beta$
+learnable, call this the \emph{PowerVolterraSurrogate}. For
+$\beta = 1$ this is a rough-lognormal-vol process; for $\beta = 0$ a
+rough additive-vol process; intermediate $\beta$ interpolates.
+Training the full parameter set
+$(\theta, c_{\rm drift}, c_{\rm stoch}, \beta, \{w_i\})$ with the
+price-plus-moment loss from a heavily misspecified initial state
+$(\theta, \kappa, \nu, \beta) = (0.10, 1.0, 0.5, 0.8)$ \emph{and} a
+$20\%$-perturbed kernel reaches IV RMSE $1.85$~vp and ATM delta bias
+$+0.014$, closer to the RH-initialised $0.80$~vp ceiling than to
+the spectral-floor $4.57$~vp. Final learned $\beta = 0.60$ (target
+$0.5$). Individual parameter values do not match rough Heston, but
+the joint trajectory and observables do, classical price-only
+identifiability that the moment loss only partially resolves.
+
+\paragraph{Live SPY option chain calibration (multi-maturity).}
+We calibrate the joint Volterra surrogate to real SPY mid prices pulled
+from Yahoo Finance at three expirations simultaneously: $T = 32$, $88$,
+and $179$ days, with $S_0 = \$745.64$. All parameters
+$(\theta, c_{\mathrm{drift}}, c_{\mathrm{stoch}}, \beta, \{w_i\})$
+are \emph{shared} across the three maturities, only one $V$ path is
+generated, and prices at each $T_i$ read from the appropriate column of
+$V$. Twenty-six liquid OTM/ATM/ITM strikes total span
+$K/S_0 \in [0.85, 1.15]$; market bid/ask spread implies $\sim\!1.4$~vp
+IV uncertainty. Initialised at
+$\theta_0 = (\mathrm{IV}^{\mathrm{ATM, short}})^2$ with $\rho = -0.85$,
+the surrogate converges in $500$ Adam steps ($3$~min, GTX~950) to:
+
+\begin{table}[h]
+\centering
+\caption{Multi-maturity calibration to live SPY options
+($S_0 = \$745.64$, $\rho = -0.85$, $26$ calibration points across three
+expirations). Overall IV RMSE $3.97$~vp; the short-end fits within
+$2\times$ bid/ask uncertainty, while the long-end shows a systematic
+under-pricing of OTM calls characteristic of single-kernel rough-vol
+calibrations (the surrogate's variance grows too slowly with $T$).}
+\label{tab:spy-multi}
+\begin{tabular}{lccc}
+\toprule
+Expiry & $T$ (yr) & Strikes & IV RMSE (vp) \\
+\midrule
+2026-06-26 ($+32$d) & 0.088 & 8 & \textbf{2.27} \\
+2026-08-21 ($+88$d) & 0.241 & 9 & 3.79 \\
+2026-11-20 ($+179$d) & 0.490 & 9 & 5.17 \\
+\midrule
+\multicolumn{3}{l}{\textbf{Overall}} & \textbf{3.97} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Final learned parameters
+$(\theta, c_{\mathrm{stoch}}, \beta) = (0.037, 0.72, 0.52)$ recover
+near-Heston dynamics ($\beta \approx 0.5$); the $\theta$ value is
+consistent with the long-run SPX VIX level. The term-structure
+residual at the $179$-day expiry, a $\sim 5$~vp uniform downward bias
+across all strikes, reflects a known limitation of \emph{stationary-
+parameter} rough-vol calibrations: a single kernel cannot match the
+SPX ATM IV term structure (rising from $15.4\%$ at $32$d to $20.8\%$ at
+$179$d here) without time-varying forward variance. Closing this is
+the multi-maturity forward-consistency direction listed below.
+
+\paragraph{SPX Hurst index from ATM term structure.}
+Before the structural calibration, we estimate the implied Hurst exponent
+directly from the SPX ATM IV term structure at three maturities
+($T \in \{0.088, 0.241, 0.490\}$~yr, ATM IVs $15.6\%$, $18.1\%$, $20.0\%$).
+Under rBergomi, $\mathrm{ATM\text{-}IV}(T) \propto T^{H-1/2}$ (Fukasawa
+approximation), so a log-log OLS fit gives
+$\hat{H}_\mathrm{SPX} = 0.145 \pm 0.002$ (standard error across 500
+bootstrap resamples of the three-point fit).
+We then train a SpectralFilter at $H = 0.145$ and evaluate against a BLP
+reference at the same parameters: $H_\mathrm{est} = 0.151$
+(structure-function, $|\Delta H| = 0.007$), IV RMSE $= 1.43$~vp
+(Figure~\ref{fig:spx-hurst}), and variance ratio
+$\mathrm{Var}(V_\mathrm{surr})/\mathrm{Var}(V_\mathrm{ref}) = 0.51$
+(some variance is absorbed in the Itô correction).
+The $|\Delta H| = 0.007$ is within the $\sqrt{\varepsilon}$ bound of
+Corollary~\ref{cor:hurst} and confirms that the Cramér PINN can be
+fitted directly to the market-implied Hurst index with no additional
+calibration.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=\textwidth]{spx_hurst_analysis}
+ \caption{%
+  \textbf{SPX Hurst analysis.}
+  Left: log-log ATM IV vs.\ maturity; slope gives
+  $\hat{H}_\mathrm{SPX} = 0.145$.
+  Right: IV surface, SpectralFilter (trained at $H=0.145$, $\eta=1.485$)
+  vs.\ BLP reference ($T\in\{0.25,0.50,1.00\}$~yr,
+  $K/S_0\in[0.80,1.20]$).  IV RMSE $= 1.43$~vp.
+ }
+ \label{fig:spx-hurst}
+\end{figure}
+
+\paragraph{Forward-variance parameterisation: rBergomi-style.}
+Multi-maturity SPY calibration with stationary $\theta$ (above) leaves
+a uniform $\sim\!5$~vp residual at the long expiry, driven by SPX's
+rising ATM-IV term structure ($15.4\% \to 20.8\%$ from $32$d to $179$d)
+that a scalar $\theta$ cannot match. The cleanest structural fix is
+the rBergomi forward-variance parameterisation:
+\begin{equation}
+ V_t \;=\; \xi(t) \cdot \exp\!\Bigl(\eta\, \hat W^H_t
+     \;-\; \tfrac{1}{2}\eta^2\,\mathrm{Var}(\hat W^H_t)\Bigr),
+ \label{eq:fwd-var}
+\end{equation}
+where $\hat W^H_t = \mathrm{cumsum}(\mathrm{CausalSF}(z))_t$ and $\xi(t)$
+is a piecewise-linear forward-variance curve parameterised by knots at
+the calibration maturities (log-parameterisation enforces positivity).
+By the lognormal martingale identity, $\mathbb{E}[V_t] = \xi(t)$
+exactly, so the ATM-IV term structure is pinned to $\sqrt{\xi(t)}$ by
+construction. V is positive without clamping, the Feller-violation
+pathology that broke the time-varying $\theta(t)$ Volterra attempt
+vanishes.
+
+Calibrating on the same SPY chain (with an empirical-mean renormalisation
+that enforces $\mathbb{E}[V_t] = \xi(t)$ exactly at the finite batch),
+we reach IV RMSE \textbf{$5.25$~vp} overall. The per-maturity breakdown
+clarifies the residual:
+\begin{table}[h]
+\centering
+\caption{rBergomi forward-variance calibration on SPY (same chain as
+Table~\ref{tab:spy-multi}, $\rho=-0.85$, $\eta = 1.485$). Martingale
+property holds exactly after the empirical-mean correction; remaining
+residual is moneyness-driven, not maturity-driven.}
+\label{tab:spy-rbergomi}
+\begin{tabular}{lcccc}
+\toprule
+Maturity & ATM IV err & Deep-ITM err ($K/S_0 = 0.85$) & Deep-OTM err & Per-mat RMSE \\
+\midrule
+32d & $-1.2$~vp & $-13.7$~vp & $-5.1$~vp & 6.13 vp \\
+88d & $-2.0$~vp & $-8.5$~vp & $-1.4$~vp & 4.05 vp \\
+179d & $-4.8$~vp & $-8.7$~vp & $-2.1$~vp & 5.46 vp \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+ATM strikes fit to within $\sim\!2$~vp; the residual is dominated by
+\emph{deep ITM} ($K/S_0 \leq 0.90$) where the surrogate's smile is too
+flat, \textbf{this is a skew mismatch, not a term-structure or
+positivity issue.} A $\$2$ price error at $K=\$635$ (where the option
+is mostly intrinsic value) is $10\%$ of the time value and only $2\%$
+of the total price, but corresponds to $\sim\!14$~vp of IV error
+because deep-ITM vega is tiny. Adam-with-uniform-price-MSE cannot see
+this in its gradients.
+
+\paragraph{Remaining open directions for Paper~3:}
+The structural calibration story is now closed: stationary-$\theta$
+Volterra ($3.97$~vp, no term structure), time-varying-$\theta$
+Volterra ($5.59$~vp, Feller violation), and rBergomi forward variance
+($5.25$~vp, no Feller, exact martingale). Closing the remaining
+moneyness-driven residual requires:
+(i) IV-direct (vega-weighted or implicit-differentiation) loss to make
+the optimiser see deep-strike error;
+(ii) two-stage calibration (ATM curve first, then smile) so $\eta$ can
+be pushed to SPX-realistic levels without breaking ATM fit;
+(iii) richer auxiliary moment losses (autocovariance, third moments) to
+constrain the joint $(V, S)$ law beyond second-order matching.
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Discussion}
+\label{sec:discussion}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\paragraph{Why the exact PSD matters.}
+The power-law PSD $S_H(f) \sim C|f|^{1-2H}$ is the correct
+\emph{asymptotic} behaviour of fGn for $f \to 0$. At mid-frequencies
+the exact PSD deviates from the power law; for $H = 0.1$ this deviation
+exceeds 10\% relative error across most of the frequency range.
+Matching the asymptotic shape correctly recovers the power-law slope but
+mis-trains the correlation structure at short lags, biasing long-maturity
+option prices (the $T = 1$ column in Table~\ref{tab:iv-rmse}).
+The PSD phase diagram (Figure~\ref{fig:psd-phase}) quantifies the
+regime boundary: exact PSD training is essential below $H\approx 0.15$;
+above $H=0.20$ both targets converge to comparable IV RMSE. The
+relative $L^2(\log)$ PSD distance drops from $0.072$ at $H=0.05$
+to $0.011$ at $H=0.30$, matching the observed IV RMSE gap.
+Horizon sensitivity (Table~\ref{tab:horizon-sweep}) shows this regime
+boundary also applies in the time domain: longer observation windows
+help Hurst recovery but amplify the low-frequency cutoff penalty,
+making the Cramér PINN most reliable for $T \leq 2$~yr.
+
+\paragraph{BochnerMLP: architecture-agnostic spectral loss.}
+The MLP surrogate outperforms SpectralFilter on overall RMSE despite
+generating non-Gaussian paths. This is expected: the MLP has more
+capacity (41k vs.\ 126 parameters) and can approximate the fGn PSD more
+closely. However, non-Gaussianity means the Itô correction
+$-\frac{1}{2}\eta^2 t^{2H}$ does not exactly ensure $\E[\hat{V}_t] =
+\xi_0$ (Jensen's inequality with non-Gaussian $\hat{W}_t$); we use the
+empirical variance correction \eqref{eq:vhat} to mitigate this.
+SpectralFilter, being a linear filter of Gaussian input, is
+\emph{guaranteed} to produce Gaussian fGn paths and avoids this issue
+entirely.
+
+\paragraph{Application to deep hedging.}
+\citet{buhler2019deep} require large batches of simulated price paths for
+training a hedging neural network. The spectral surrogate reduces
+path generation from $O(N^2)$ (Cholesky-based fBm) or $O(N \log N)$
+(Wood--Chan) to a single forward pass of the trained network, enabling
+on-the-fly batch sampling. The $\approx 1.2$~vp IV accuracy is well
+within the calibration precision of typical options desks.
+However, \cref{sec:greeks} shows that Greeks require the joint $(V, S)$
+law: the spectral surrogate, which matches only the marginal distribution
+of $V$, carries an irreducible delta bias of $\approx -0.27$ at ATM
+when $\rho = -0.9$. Deep hedging with a spectral surrogate therefore
+requires either a joint-law surrogate (future work) or a Malliavin
+score correction to recover the leverage contribution. A circular-FFT $z$-Cholesky attempt fails (204~vp, delta $>1$) due to
+wrap-around making $V_k$ depend on future innovations
+(Section~\ref{sec:greeks}). The CausalSpectralFilter resolves this
+exactly, achieving 3.26~vp and delta bias $-0.07$, a 63$\times$ RMSE
+improvement available at no additional training cost.
+
+\paragraph{Comparison to Markovian approximations.}
+A standard industry approach to rough volatility is to approximate the
+fractional kernel by a finite sum of exponentials, yielding a
+\emph{Markovian} multi-factor model that can be simulated with
+conventional Euler schemes. Two leading constructions are:
+
+\begin{itemize}
+ \item \textbf{Lifted Heston} \citep{abijaber2019affine,el2019perfect}:
+  approximates the fractional Riccati--Volterra equation by an
+  $n$-dimensional affine jump-diffusion, with $n=5$--$20$ factors
+  needed for $H \approx 0.1$. Pricing is via Fourier inversion
+  (characteristic function available in closed form), but the
+  characteristic function becomes increasingly expensive as $n$ grows.
+ \item \textbf{3-factor Bergomi} \citep{bayer2020markovian}:
+  parameterises a low-dimensional Markovian system whose joint
+  (stock, variance) dynamics approximate the rough Bergomi
+  smile. Calibration requires non-convex optimisation over
+  $\sim 10$ parameters and the approximation degrades for
+  $H < 0.07$, where 3 factors cannot capture the roughness.
+\end{itemize}
+
+These Markovian methods share a fundamental limitation: the number of
+factors controls the quality of the fractional-kernel approximation, and
+the approximation error propagates to option prices in a way that depends
+on both the strike and the maturity. In contrast, the spectral surrogate
+\emph{directly targets the PSD} of the fGn increments, bypassing the
+kernel-approximation step entirely. The implication is that the spectral
+surrogate's accuracy is determined by the spectral loss convergence
+(Theorem~\ref{thm:main}) rather than by a factor-count parameter, and it
+does not degrade as $H \to 0$, a regime where Markovian approximations
+require increasingly many factors or break down altogether (Table~\ref{tab:hurst}
+shows $|\Delta H| \leq 0.013$ at $H=0.05$, where $n=3$ Markovian
+approximations typically incur bias $>0.03$ in recovered $H$).
+
+A secondary advantage is that the spectral surrogate produces paths in
+a single forward pass with no matrix exponentials, no Riccati ODE
+integration, and no Fourier inversion, it is a pure feed-forward
+generator, making it trivially vectorisable and GPU-friendly. The
+trade-off is a one-time training cost and the $W_2$ convergence
+guarantee that holds only for the Gaussian projection of the law
+(Theorem~\ref{thm:main}, Assumption~\ref{ass:gauss}).
+
+\paragraph{Connection to Paper 1.}
+The proof structure is a one-assumption extension of \citet{TODO-paper1}:
+Bochner (stationary levels) $\to$ Cramér (stationary increments);
+all other lemmas carry over unchanged (see the proof-extension guide,
+\texttt{proof\_extension\_guide.tex}). The new content is the Hurst
+corollary (\cref{cor:hurst}) and the financial validation.
+
+% ═════════════════════════════════════════════════════════════════════════════
+\section{Conclusion}
+\label{sec:conclusion}
+% ═════════════════════════════════════════════════════════════════════════════
+
+We have introduced the Cramér PINN, a neural-network surrogate for the
+rough Bergomi and rough Heston models trained to match the exact power
+spectral density of fractional Gaussian noise. The main contributions
+are: a $W_2$ convergence theorem extending the Bochner PINN framework to
+processes with stationary increments; a Hurst exponent consistency
+corollary; an empirical demonstration that exact PSD matching achieves
+1.21--1.33 vol-point IV surface RMSE under $\rho = 0$, $1.7\times$
+better than the asymptotic power-law approximation and near the Monte
+Carlo noise floor; a Greek bias analysis showing that the marginal $V$ surrogate carries
+an irreducible ATM delta bias of $-0.27$ ($35\%$) when $\rho = -0.9$
+under \emph{rough Heston}; a \emph{CausalSpectralFilter} (causal
+convolution, same PSD loss) that resolves the circular-FFT wrap-around
+pathology, achieving 3.26~vp vs.\ the BLP rBergomi reference (or
+\textbf{2.57~vp} with matched-PSD training, leaving only Monte-Carlo
+noise) and reducing the rBergomi delta bias to $\lesssim 0.01$; on rough
+Heston the same spectral architecture cuts the cross-model bias from
+$+0.49$ to $-0.15$ (41$\times$ IV RMSE improvement), and a
+Volterra-aware autoregressive surrogate closes the residual to MC noise
+(0.80~vp, bias $\leq 0.005$); a Hurst estimator comparison showing that
+structure function achieves the smallest bias ($|\text{bias}|\leq 0.011$)
+for $H\in[0.05,0.30]$ while PSD slope and R/S are unreliable below $H=0.2$;
+a PSD phase diagram establishing $H\approx 0.15$ as the threshold below
+which exact (not asymptotic) PSD training is essential; an observation-horizon
+sweep recommending $T\leq 2$~yr for IV RMSE below $1.6$~vp; and a live SPX
+Hurst estimate $\hat{H}_\mathrm{SPX}=0.145$ from the ATM IV term structure,
+recovered by the surrogate to within $|\Delta H|=0.007$.
+
+The CausalSpectralFilter introduced in Section~\ref{sec:greeks} already
+handles $\rho \neq 0$ for rBergomi (3.26~vp vs.\ BLP reference).
+Remaining natural extensions are: (i) a joint $(V, S)$ surrogate trained
+on paired paths, which would close the residual $-0.07$ delta bias
+attributable to the V-distribution gap; (ii) the deep hedging application
+\citep{buhler2019deep}, for which the causal surrogate is a drop-in path
+generator; and (iii) extension to other rough volatility models (RFSV,
+multifactor Bergomi) where the same Cramér PSD loss applies.
+
+% ═════════════════════════════════════════════════════════════════════════════
+\appendix
+\section{Proofs}
+% ═════════════════════════════════════════════════════════════════════════════
+
+\subsection{Proof of Theorem~\ref{thm:main}}
+
+We bound the three terms in \eqref{eq:main-bound} separately and then
+combine. Throughout, Assumptions~\ref{ass:si}--\ref{ass:gauss} are in force.
+
+\paragraph{Reduction to the Gelbrich formula.}
+Under Assumption~\ref{ass:gauss}, both $u_\theta$ and $u_{\mathrm{ref}}$
+are centred Gaussian processes; their laws are completely determined by
+their covariance operators $C_\theta, C_{\mathrm{ref}}$ on $L^2([0,T])$.
+The Bures--Gelbrich formula \citep{gelbrich1990formula} gives
+\begin{equation}\label{eq:gelbrich-main}
+ W_2^2\!\bigl(\mathcal{L}(u_\theta),\,\mathcal{L}(u_{\mathrm{ref}})\bigr)
+ = \bigl\|C_\theta^{1/2} - C_{\mathrm{ref}}^{1/2}\bigr\|_{\HS}^2.
+\end{equation}
+We bound the right-hand side in four steps.
+
+\paragraph{Step 1 (Square-root Lipschitz).}
+Because both processes have stationary increments with Cram\'er spectral
+densities satisfying Assumption~\ref{ass:nd}, the covariance operators are
+bounded below: $C_\theta, C_{\mathrm{ref}} \geq \mu_{\min} I$ on the
+spectral support $[\omega_0,\Omega]$. The operator square-root Lipschitz
+bound \citep[Thm.~X.1.1]{bhatia1997matrix} then gives
+\begin{equation}\label{eq:sqrt-lip}
+ \bigl\|C_\theta^{1/2} - C_{\mathrm{ref}}^{1/2}\bigr\|_{\HS}
+ \;\leq\;
+ \frac{1}{2\sqrt{\mu_{\min}}}\,
+ \bigl\|C_\theta - C_{\mathrm{ref}}\bigr\|_{\HS},
+\end{equation}
+so that $W_2^2 \leq (4\mu_{\min})^{-1}\|C_\theta - C_{\mathrm{ref}}\|_{\HS}^2$.
+
+\paragraph{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm).}
+By Assumption~\ref{ass:si}, the covariance kernel difference is
+\[
+ \Delta K(t,s) = \int_{\omega_0}^{\Omega}
+  (e^{i\omega t}-1)\,\overline{(e^{i\omega s}-1)}\,
+  \bigl(S_\theta(\omega)-S_{\mathrm{ref}}(\omega)\bigr)\,d\omega.
+\]
+Applying Fubini's theorem, $|e^{i\omega t}-1|^2 \leq 4$, and
+Cauchy--Schwarz on $[\omega_0,\Omega]$:
+\begin{equation}\label{eq:parseval-main}
+ \bigl\|C_\theta - C_{\mathrm{ref}}\bigr\|_{\HS}^2
+ = \int_0^T\!\!\int_0^T |\Delta K(t,s)|^2\,dt\,ds
+ \;\leq\;
+ \frac{T^2}{2\pi}\,
+ \bigl\|S_\theta - S_{\mathrm{ref}}\bigr\|_{L^2([\omega_0,\Omega])}^2.
+\end{equation}
+(The factor $2\pi$ absorbs the exact integral
+$\int_0^1|e^{i\omega t}-1|^2\,dt = 2-2\sin\omega/\omega \leq 4$.)
+
+Combining Steps~1--2 with \eqref{eq:gelbrich-main}:
+\begin{equation}\label{eq:spectral-bound}
+ W_2\!\bigl(\mathcal{L}(u_\theta),\,\mathcal{L}(u_{\mathrm{ref}})\bigr)
+ \;\leq\;
+ \frac{T}{2\sqrt{2\pi\mu_{\min}}}\,
+ \bigl\|S_\theta - S_{\mathrm{ref}}\bigr\|_{L^2([\omega_0,\Omega])}
+ \;=:\;
+ \frac{C_T}{\mu_{\min}^{1/2}}\,
+ \bigl\|S_\theta - S_{\mathrm{ref}}\bigr\|_{L^2([\omega_0,\Omega])}.
+\end{equation}
+This is the spectral term in \eqref{eq:main-bound} with $C_T = T/(2\sqrt{2\pi})$.
+
+\paragraph{Step 3 (Discretisation error).}
+The spectral loss $\mathcal{L}(\theta)$ is evaluated on a discrete grid of
+$N_s$ frequency points in $[\omega_0,\Omega]$. The surrogate fGn PSD
+$S_\theta$ is a piecewise-smooth function inheriting the Sobolev
+regularity $H^{H-\varepsilon}$ of fBm increments ($\beta_H =
+\tfrac{1}{2}\min(H-\tfrac{1}{2}+\tfrac{d}{2},1)$ for dimension $d$).
+Standard FFT quadrature theory gives
+\[
+ \bigl\|S_\theta^{\mathrm{discrete}} - S_\theta^{\mathrm{continuous}}
+ \bigr\|_{L^2([\omega_0,\Omega])}
+ \;\leq\; C_{\mathrm{quad}}\,N_s^{-\beta_H},
+\]
+with $C_{\mathrm{quad}}$ depending on $\|S_\theta\|_{H^{\beta_H}}$
+and the geometry of the frequency grid
+(cf.\ \citet{TODO-paper1}, Appendix~A, Lemma~A.4).
+Inserting into \eqref{eq:spectral-bound} and setting
+$C_2 = C_T\,C_{\mathrm{quad}}/\mu_{\min}^{1/2}$ gives the
+discretisation term $C_2\,N_s^{-\beta_H}$.
+
+\paragraph{Step 4 (Low-frequency cutoff).}
+The spectral window $[\omega_0,\Omega]$ excludes the interval $[0,\omega_0)$
+where the fBm PSD $S_H(\omega) = C_H|\omega|^{1-2H}$ diverges for $H < 1/2$.
+Restricting to $\omega_0 > 0$ is necessary for Assumption~\ref{ass:nd} to
+hold. The penalty for this restriction enters via $\mu_{\min}$: since
+\[
+ \mu_{\min} \;=\; S_H(\omega_0) \;=\; C_H\,\omega_0^{1-2H},
+\]
+the constant in \eqref{eq:spectral-bound} satisfies
+$\mu_{\min}^{-1/2} = C_H^{-1/2}\,\omega_0^{-(1-2H)/2}$.
+For any fixed spectral gap $\|S_\theta-S_{\mathrm{ref}}\|_{L^2}$, the
+$W_2$ bound degrades as $\omega_0^{-(1-2H)/2}$ as the window shrinks toward
+the origin. Setting
+\[
+ C_3\,\omega_0^{-(1-2H)/2}
+ := \frac{C_T\,\|S_\theta-S_{\mathrm{ref}}\|_{L^2}}{C_H^{1/2}}\,
+   \omega_0^{-(1-2H)/2}
+\]
+identifies the third term; it vanishes as $\omega_0 \to 0$ only when
+$H > 1/2$ (the PSD then integrates to zero at the origin).
+
+\paragraph{Combining the three terms.}
+The triangle inequality on $W_2$ applied through the spectral estimate at
+grid resolution $N_s$ and at frequency cutoff $\omega_0$ gives
+\begin{align*}
+ W_2\!\bigl(\mathcal{L}(u_\theta),\mathcal{L}(u_{\mathrm{ref}})\bigr)
+ &\leq\;
+ \underbrace{\frac{C_T}{\mu_{\min}^{1/2}}
+ \bigl\|S_\theta-S_{\mathrm{ref}}\bigr\|_{L^2([\omega_0,\Omega])}}_{\text{spectral term}}
+ \;+\;
+ \underbrace{C_2\,N_s^{-\beta_H}}_{\text{discretisation}}
+ \;+\;
+ \underbrace{C_3\,\omega_0^{-(1-2H)/2}}_{\text{cutoff}}.
+\end{align*}
+This is \eqref{eq:main-bound}. The three contributions are independent:
+the spectral term vanishes when the trained PSD matches the target;
+the discretisation term vanishes as the frequency grid is refined;
+the cutoff term reflects the irreducible cost of avoiding the $\omega = 0$
+singularity.\hfill$\square$
+
+\subsection{Wood--Chan simulation}
+\label{app:wood-chan}
+
+Exact simulation of fGn using circulant embedding
+\citep{wood1994simulation, dietrich1997fast}.
+
+The method exploits the fact that the covariance matrix of fGn increments
+$(\Delta W^H_1, \ldots, \Delta W^H_N)$ is a Toeplitz matrix
+$\Gamma_{jk} = \tfrac{1}{2}(|j-k+1|^{2H} - 2|j-k|^{2H} + |j-k-1|^{2H})$.
+Every Toeplitz matrix can be embedded in a circulant $C$ of size $2N$;
+if the embedding is positive semidefinite, the square root
+$C^{1/2}$ is available via FFT in $O(N\log N)$. A realisation
+of fGn is then $\Delta W^H = \mathrm{Re}(\mathcal{F}^{-1}[C^{1/2}z])$
+where $z \sim \mathcal{CN}(0, I)$. Davies and Harte (1987) showed the
+embedding is always positive semidefinite for $H \in (0,1)$ after
+mirroring; \citet{wood1994simulation} and \citet{dietrich1997fast}
+provide the practical algorithm. Our implementation is in
+\texttt{rbm\_reference.py}, function \texttt{simulate\_fBm\_woodchan}.
+
+% ─────────────────────────────────────────────────────────────────────────────
+\bibliographystyle{plainnat}
+\bibliography{references}
+\end{document}

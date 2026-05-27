@@ -1,0 +1,37 @@
+\contentsline {section}{\numberline {1}Introduction}{1}{section.1}%
+\contentsline {subsection}{\numberline {1.1}Leverage effect and Greek bias ($\rho = -0.9$)}{3}{subsection.1.1}%
+\contentsline {paragraph}{Setup.}{3}{section*.2}%
+\contentsline {paragraph}{IV surface.}{3}{section*.3}%
+\contentsline {paragraph}{Delta bias.}{3}{section*.4}%
+\contentsline {subsection}{\numberline {1.2}CausalSpectralFilter: supporting $\rho \neq 0$}{4}{subsection.1.2}%
+\contentsline {paragraph}{Setup: $z$-Cholesky and the BLP reference.}{4}{section*.5}%
+\contentsline {paragraph}{Circular filter: catastrophic failure.}{5}{section*.6}%
+\contentsline {paragraph}{CausalSpectralFilter: architecture and initialisation.}{5}{section*.7}%
+\contentsline {paragraph}{Results.}{5}{section*.8}%
+\contentsline {paragraph}{Robustness across $H$.}{6}{section*.9}%
+\contentsline {paragraph}{Closing the residual: matched-PSD training.}{6}{section*.10}%
+\contentsline {paragraph}{Cross-model: causal $z$-Cholesky on rough Heston.}{6}{section*.11}%
+\contentsline {paragraph}{Two negative results: spectral matching of rough Heston $V$ makes things worse.}{7}{section*.12}%
+\contentsline {paragraph}{Volterra-aware prototype closes the cross-model bias.}{8}{section*.13}%
+\contentsline {paragraph}{Sub-quadratic Volterra updates.}{9}{section*.14}%
+\contentsline {paragraph}{Non-affine generalisation and full joint training.}{9}{section*.15}%
+\contentsline {paragraph}{Live SPY option chain calibration (multi-maturity).}{9}{section*.16}%
+\contentsline {paragraph}{SPX Hurst index from ATM term structure.}{10}{section*.17}%
+\contentsline {paragraph}{Forward-variance parameterisation: rBergomi-style.}{10}{section*.18}%
+\contentsline {paragraph}{Remaining open directions for Paper~3:}{10}{section*.19}%
+\contentsline {section}{\numberline {2}Discussion}{11}{section.2}%
+\contentsline {paragraph}{Why the exact PSD matters.}{11}{section*.20}%
+\contentsline {paragraph}{BochnerMLP: architecture-agnostic spectral loss.}{11}{section*.21}%
+\contentsline {paragraph}{Application to deep hedging.}{11}{section*.22}%
+\contentsline {paragraph}{Comparison to Markovian approximations.}{12}{section*.23}%
+\contentsline {paragraph}{Connection to Paper 1.}{12}{section*.24}%
+\contentsline {section}{\numberline {3}Conclusion}{12}{section.3}%
+\contentsline {section}{\numberline {A}Proofs}{13}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Proof of Theorem~\ref {thm:main}}{13}{subsection.A.1}%
+\contentsline {paragraph}{Reduction to the Gelbrich formula.}{13}{section*.25}%
+\contentsline {paragraph}{Step 1 (Square-root Lipschitz).}{13}{section*.26}%
+\contentsline {paragraph}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm).}{13}{section*.27}%
+\contentsline {paragraph}{Step 3 (Discretisation error).}{14}{section*.28}%
+\contentsline {paragraph}{Step 4 (Low-frequency cutoff).}{14}{section*.29}%
+\contentsline {paragraph}{Combining the three terms.}{14}{section*.30}%
+\contentsline {subsection}{\numberline {A.2}Wood--Chan simulation}{14}{subsection.A.2}%

@@ -1,0 +1,245 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{gatheral2018volatility}
+\citation{bayer2016pricing,ElEuch2019}
+\citation{bayer2016pricing}
+\citation{bennedsen2017hybrid}
+\citation{buhler2019deep}
+\citation{TODO-paper1}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{2}{Introduction}{section.1}{}}
+\newlabel{sec:intro@cref}{{[section][1][]1}{[1][2][]2}{}{}{}}
+\newlabel{eq:rbergomi}{{1}{2}{Introduction}{equation.1}{}}
+\newlabel{eq:rbergomi@cref}{{[equation][1][]1}{[1][2][]2}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{The computational bottleneck.}{2}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{This paper.}{2}{section*.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Contributions.}{2}{section*.4}\protected@file@percent }
+\citation{TODO-paper1}
+\citation{bayer2016pricing}
+\citation{gatheral2018volatility}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Roughness gallery.} Simulated fBm paths $W^H_t$ (top row) and instantaneous variance $V_t = \xi _0\exp (\eta W^H_t - \tfrac  {1}{2}\eta ^2 t^{2H})$ (bottom row) for $H \in \{0.50, 0.30, 0.10, 0.05\}$, with $\eta =1.9$, $\xi _0=0.04$. Decreasing $H$ produces increasingly rough, rapidly mean-reverting paths. The empirically calibrated value $H \approx 0.1$ (third column) generates the jagged, persistent variance clustering seen in equity markets. Standard Brownian motion ($H=0.5$, left) is manifestly too smooth. }}{3}{figure.1}\protected@file@percent }
+\newlabel{fig:roughness-gallery}{{1}{3}{\textbf {Roughness gallery.} Simulated fBm paths $W^H_t$ (top row) and instantaneous variance $V_t = \xi _0\exp (\eta W^H_t - \tfrac {1}{2}\eta ^2 t^{2H})$ (bottom row) for $H \in \{0.50, 0.30, 0.10, 0.05\}$, with $\eta =1.9$, $\xi _0=0.04$. Decreasing $H$ produces increasingly rough, rapidly mean-reverting paths. The empirically calibrated value $H \approx 0.1$ (third column) generates the jagged, persistent variance clustering seen in equity markets. Standard Brownian motion ($H=0.5$, left) is manifestly too smooth}{figure.1}{}}
+\newlabel{fig:roughness-gallery@cref}{{[figure][1][]1}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Relation to Paper 1.}{3}{section*.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2}Background}{3}{section.2}\protected@file@percent }
+\newlabel{sec:background}{{2}{3}{Background}{section.2}{}}
+\newlabel{sec:background@cref}{{[section][2][]2}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}The rough Bergomi model}{3}{subsection.2.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Why fBm?}{3}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Fractional Gaussian noise and its PSD}{3}{subsection.2.2}\protected@file@percent }
+\newlabel{sec:fgn-psd}{{2.2}{3}{Fractional Gaussian noise and its PSD}{subsection.2.2}{}}
+\newlabel{sec:fgn-psd@cref}{{[subsection][2][2]2.2}{[1][3][]3}{}{}{}}
+\newlabel{eq:fgn-psd}{{2}{3}{Fractional Gaussian noise and its PSD}{equation.2}{}}
+\newlabel{eq:fgn-psd@cref}{{[equation][2][]2}{[1][3][]3}{}{}{}}
+\citation{cramer1942harmonic}
+\newlabel{eq:power-law}{{3}{4}{Fractional Gaussian noise and its PSD}{equation.3}{}}
+\newlabel{eq:power-law@cref}{{[equation][3][]3}{[1][3][]4}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Key point.}{4}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Cramér spectral representation}{4}{subsection.2.3}\protected@file@percent }
+\newlabel{eq:cramer}{{4}{4}{Cramér spectral representation}{equation.4}{}}
+\newlabel{eq:cramer@cref}{{[equation][4][]4}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3}Spectral Surrogates for fBm-Driven SDEs}{4}{section.3}\protected@file@percent }
+\newlabel{sec:method}{{3}{4}{Spectral Surrogates for fBm-Driven SDEs}{section.3}{}}
+\newlabel{sec:method@cref}{{[section][3][]3}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Architecture}{4}{subsection.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{SpectralFilter.}{4}{section*.8}\protected@file@percent }
+\newlabel{eq:spectral-filter}{{5}{4}{SpectralFilter}{equation.5}{}}
+\newlabel{eq:spectral-filter@cref}{{[equation][5][]5}{[1][4][]4}{}{}{}}
+\newlabel{eq:smart-init}{{6}{4}{SpectralFilter}{equation.6}{}}
+\newlabel{eq:smart-init@cref}{{[equation][6][]6}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{BochnerMLP.}{4}{section*.9}\protected@file@percent }
+\newlabel{eq:mlp}{{7}{4}{BochnerMLP}{equation.7}{}}
+\newlabel{eq:mlp@cref}{{[equation][7][]7}{[1][4][]4}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Exact vs.\ asymptotic fGn spectral density, $H=0.1$.} \emph  {Main panel:} log--log plot of the exact Monte Carlo PSD (blue, averaged over $10^5$ Wood--Chan paths) and the asymptotic power-law $C|f|^{1-2H}$ (orange, normalised to equal total power). The two targets agree in slope but diverge in amplitude across the full frequency range. \emph  {Inset:} relative error $(S_{\mathrm  {exact}}-S_{\mathrm  {asymp}})/S_{\mathrm  {exact}}$; the asymptotic target over-estimates power at mid-frequencies by up to 15\%, which biases long-maturity option prices (see Table~\ref {tab:iv-rmse} and \cref  {fig:iv-surrogate}). }}{5}{figure.2}\protected@file@percent }
+\newlabel{fig:psd-comparison}{{2}{5}{\textbf {Exact vs.\ asymptotic fGn spectral density, $H=0.1$.} \emph {Main panel:} log--log plot of the exact Monte Carlo PSD (blue, averaged over $10^5$ Wood--Chan paths) and the asymptotic power-law $C|f|^{1-2H}$ (orange, normalised to equal total power). The two targets agree in slope but diverge in amplitude across the full frequency range. \emph {Inset:} relative error $(S_{\mathrm {exact}}-S_{\mathrm {asymp}})/S_{\mathrm {exact}}$; the asymptotic target over-estimates power at mid-frequencies by up to 15\%, which biases long-maturity option prices (see Table~\ref {tab:iv-rmse} and \cref {fig:iv-surrogate})}{figure.2}{}}
+\newlabel{fig:psd-comparison@cref}{{[figure][2][]2}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Spectral loss}{5}{subsection.3.2}\protected@file@percent }
+\newlabel{eq:loss}{{8}{5}{Spectral loss}{equation.8}{}}
+\newlabel{eq:loss@cref}{{[equation][8][]8}{[1][4][]5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Variance path generation}{5}{subsection.3.3}\protected@file@percent }
+\newlabel{eq:vhat}{{10}{5}{Variance path generation}{equation.10}{}}
+\newlabel{eq:vhat@cref}{{[equation][10][]10}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Convergence Theory}{5}{section.4}\protected@file@percent }
+\newlabel{sec:theory}{{4}{5}{Convergence Theory}{section.4}{}}
+\newlabel{sec:theory@cref}{{[section][4][]4}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Assumptions}{5}{subsection.4.1}\protected@file@percent }
+\newlabel{ass:si}{{A1}{5}{Stationary increments}{assumption.1}{}}
+\newlabel{ass:si@cref}{{[assumption][1][]A1}{[1][5][]5}{}{}{}}
+\newlabel{ass:nd}{{A2}{5}{Spectral non-degeneracy}{assumption.2}{}}
+\newlabel{ass:nd@cref}{{[assumption][2][]A2}{[1][5][]5}{}{}{}}
+\newlabel{ass:tol}{{A3}{5}{Training tolerance}{assumption.3}{}}
+\newlabel{ass:tol@cref}{{[assumption][3][]A3}{[1][5][]5}{}{}{}}
+\newlabel{ass:gauss}{{A4}{5}{Gaussianity}{assumption.4}{}}
+\newlabel{ass:gauss@cref}{{[assumption][4][]A4}{[1][5][]5}{}{}{}}
+\citation{gelbrich1990formula}
+\citation{TODO-paper1}
+\citation{TODO-paper1}
+\citation{gatheral2018volatility,bayer2016pricing}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Main theorem}{6}{subsection.4.2}\protected@file@percent }
+\newlabel{thm:main}{{4.1}{6}{Cramér PINN convergence}{theorem.4.1}{}}
+\newlabel{thm:main@cref}{{[theorem][1][4]4.1}{[1][5][]6}{}{}{}}
+\newlabel{eq:main-bound}{{11}{6}{Cramér PINN convergence}{equation.11}{}}
+\newlabel{eq:main-bound@cref}{{[equation][11][]11}{[1][5][]6}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Cramér-to-Gelbrich lemma}{6}{subsection.4.3}\protected@file@percent }
+\newlabel{lem:cramer-gelbrich}{{4.2}{6}{Cramér-to-Gelbrich}{theorem.4.2}{}}
+\newlabel{lem:cramer-gelbrich@cref}{{[theorem][2][4]4.2}{[1][6][]6}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Hurst exponent consistency}{6}{subsection.4.4}\protected@file@percent }
+\newlabel{cor:hurst}{{4.3}{6}{Hurst recovery}{theorem.4.3}{}}
+\newlabel{cor:hurst@cref}{{[theorem][3][4]4.3}{[1][6][]6}{}{}{}}
+\citation{wood1994simulation}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {Hurst exponent recovery.} Estimated $\hat  {H}$ (structure-function OLS) vs.\ true $H$ for the SpectralFilter trained on exact (blue) and asymptotic (orange) PSD targets. The diagonal (dashed) is perfect recovery. Exact PSD training lies within $|\Delta H| \leq 0.013$ of the diagonal across the full rough-vol range $H \in [0.05, 0.50]$. The asymptotic target systematically over-estimates $H$ for $H \leq 0.3$ (bias up to $+0.09$ at $H=0.05$), consistent with Corollary~\ref {cor:hurst} and the mid-frequency PSD mis-match in Figure~\ref {fig:psd-comparison}. }}{7}{figure.3}\protected@file@percent }
+\newlabel{fig:hurst-recovery}{{3}{7}{\textbf {Hurst exponent recovery.} Estimated $\hat {H}$ (structure-function OLS) vs.\ true $H$ for the SpectralFilter trained on exact (blue) and asymptotic (orange) PSD targets. The diagonal (dashed) is perfect recovery. Exact PSD training lies within $|\Delta H| \leq 0.013$ of the diagonal across the full rough-vol range $H \in [0.05, 0.50]$. The asymptotic target systematically over-estimates $H$ for $H \leq 0.3$ (bias up to $+0.09$ at $H=0.05$), consistent with Corollary~\ref {cor:hurst} and the mid-frequency PSD mis-match in Figure~\ref {fig:psd-comparison}}{figure.3}{}}
+\newlabel{fig:hurst-recovery@cref}{{[figure][3][]3}{[1][7][]7}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {5}Experiments}{7}{section.5}\protected@file@percent }
+\newlabel{sec:experiments}{{5}{7}{Experiments}{section.5}{}}
+\newlabel{sec:experiments@cref}{{[section][5][]5}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Setup}{7}{subsection.5.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Model parameters.}{7}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reference simulation.}{7}{section*.11}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Surrogates.}{7}{section*.12}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Hurst exponent recovery}{7}{subsection.5.2}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Hurst exponent recovery (structure function estimator), Hurst sweep $H \in \{0.05, 0.10, 0.15, 0.20, 0.30, 0.50\}$. SpectralFilter, 2000 epochs, smart initialisation.}}{7}{table.1}\protected@file@percent }
+\newlabel{tab:hurst}{{1}{7}{Hurst exponent recovery (structure function estimator), Hurst sweep $H \in \{0.05, 0.10, 0.15, 0.20, 0.30, 0.50\}$. SpectralFilter, 2000 epochs, smart initialisation}{table.1}{}}
+\newlabel{tab:hurst@cref}{{[table][1][]1}{[1][7][]7}{}{}{}}
+\newlabel{rem:filter-geometry}{{5.1}{7}{Filter geometry: Bochner loss does not recover the Cholesky factor}{theorem.5.1}{}}
+\newlabel{rem:filter-geometry@cref}{{[theorem][1][5]5.1}{[1][7][]7}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {Learned log-amplitude vs.\ theoretical Cholesky factor.} Blue: SpectralFilter learned $a_k$ after 3000 epochs. Orange: exact Cholesky factor $\tfrac  {1}{2}\log (S_H(f_k)\cdot N/(2\,\mathrm  {d}t))$. The maximum per-frequency gap $\max _k|\Delta a_k| = 2.77$ is identical for $H \in \{0.05, 0.10, 0.30\}$: the Bochner loss has a large solution manifold and the gradient descent finds a solution that satisfies the PSD constraint in expectation without converging to the Cholesky factor. }}{8}{figure.4}\protected@file@percent }
+\newlabel{fig:filter-geometry}{{4}{8}{\textbf {Learned log-amplitude vs.\ theoretical Cholesky factor.} Blue: SpectralFilter learned $a_k$ after 3000 epochs. Orange: exact Cholesky factor $\tfrac {1}{2}\log (S_H(f_k)\cdot N/(2\,\mathrm {d}t))$. The maximum per-frequency gap $\max _k|\Delta a_k| = 2.77$ is identical for $H \in \{0.05, 0.10, 0.30\}$: the Bochner loss has a large solution manifold and the gradient descent finds a solution that satisfies the PSD constraint in expectation without converging to the Cholesky factor}{figure.4}{}}
+\newlabel{fig:filter-geometry@cref}{{[figure][4][]4}{[1][7][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Hurst estimator comparison}{8}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:hurst-estimators}{{5.3}{8}{Hurst estimator comparison}{subsection.5.3}{}}
+\newlabel{sec:hurst-estimators@cref}{{[subsection][3][5]5.3}{[1][7][]8}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Hurst estimator comparison: bias and standard deviation ($N=252$, 300~paths per $H$). Structure function achieves smallest absolute bias ($|\text  {bias}|\leq 0.011$ for $H\leq 0.30$). Cram\'er exact achieves tightest standard deviation ($0.012$, nearly constant). PSD slope and R/S are unreliable for rough vol: PSD slope incurs severe negative bias at small $H$ ($-0.195$ at $H=0.05$); R/S has a large positive bias ($+0.20$) uniform in $H$.}}{8}{table.2}\protected@file@percent }
+\newlabel{tab:hurst-estimators}{{2}{8}{Hurst estimator comparison: bias and standard deviation ($N=252$, 300~paths per $H$). Structure function achieves smallest absolute bias ($|\text {bias}|\leq 0.011$ for $H\leq 0.30$). Cram\'er exact achieves tightest standard deviation ($0.012$, nearly constant). PSD slope and R/S are unreliable for rough vol: PSD slope incurs severe negative bias at small $H$ ($-0.195$ at $H=0.05$); R/S has a large positive bias ($+0.20$) uniform in $H$}{table.2}{}}
+\newlabel{tab:hurst-estimators@cref}{{[table][2][]2}{[1][8][]8}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces \textbf  {Hurst estimator comparison.} Violin plots of $\hat  {H}$ across 300 paths for each method. Structure function (blue) tracks the diagonal closely with small variance. Cram\'er exact (green) is tightest but has a $+0.055$ positive bias from the finite-$N$ frequency cutoff. PSD slope (orange) collapses near zero for $H\leq 0.10$; R/S (red) overshoots by $+0.20$ uniformly. }}{8}{figure.5}\protected@file@percent }
+\newlabel{fig:hurst-estimators}{{5}{8}{\textbf {Hurst estimator comparison.} Violin plots of $\hat {H}$ across 300 paths for each method. Structure function (blue) tracks the diagonal closely with small variance. Cram\'er exact (green) is tightest but has a $+0.055$ positive bias from the finite-$N$ frequency cutoff. PSD slope (orange) collapses near zero for $H\leq 0.10$; R/S (red) overshoots by $+0.20$ uniformly}{figure.5}{}}
+\newlabel{fig:hurst-estimators@cref}{{[figure][5][]5}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Implied volatility surface}{8}{subsection.5.4}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces IV surface RMSE (vol points) vs.\ MC reference. Strikes $K/S_0 \in \{0.80, \ldots  , 1.20\}$, maturities $T \in \{0.25, 0.50, 1.00\}$. MC noise floor $\approx 1.0$~vp (10k paths). Primary calibration: $H=0.1$, $\eta =1.9$, $\xi _0=0.04$.}}{9}{table.3}\protected@file@percent }
+\newlabel{tab:iv-rmse}{{3}{9}{IV surface RMSE (vol points) vs.\ MC reference. Strikes $K/S_0 \in \{0.80, \ldots , 1.20\}$, maturities $T \in \{0.25, 0.50, 1.00\}$. MC noise floor $\approx 1.0$~vp (10k paths). Primary calibration: $H=0.1$, $\eta =1.9$, $\xi _0=0.04$}{table.3}{}}
+\newlabel{tab:iv-rmse@cref}{{[table][3][]3}{[1][8][]9}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces \textbf  {Implied volatility smiles: MC reference vs.\ surrogates.} Each panel shows one maturity ($T \in \{0.25, 0.50, 1.00\}$); $x$-axis is moneyness $K/S_0$, $y$-axis is IV in \%. RMSE (vol points) relative to the MC reference is shown in the legend. SpectralFilter (exact PSD) tracks the reference closely at all maturities; SpectralFilter (asymptotic) incurs a systematic upward bias at $T=1.00$ (3.20~vp), where the mid-frequency PSD mis-match propagates to long-dated smile levels. BochnerMLP achieves the lowest per-maturity RMSE despite generating non-Gaussian paths, confirming that the spectral loss is architecture-agnostic. }}{9}{figure.6}\protected@file@percent }
+\newlabel{fig:iv-surrogate}{{6}{9}{\textbf {Implied volatility smiles: MC reference vs.\ surrogates.} Each panel shows one maturity ($T \in \{0.25, 0.50, 1.00\}$); $x$-axis is moneyness $K/S_0$, $y$-axis is IV in \%. RMSE (vol points) relative to the MC reference is shown in the legend. SpectralFilter (exact PSD) tracks the reference closely at all maturities; SpectralFilter (asymptotic) incurs a systematic upward bias at $T=1.00$ (3.20~vp), where the mid-frequency PSD mis-match propagates to long-dated smile levels. BochnerMLP achieves the lowest per-maturity RMSE despite generating non-Gaussian paths, confirming that the spectral loss is architecture-agnostic}{figure.6}{}}
+\newlabel{fig:iv-surrogate@cref}{{[figure][6][]6}{[1][9][]9}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{PSD phase diagram.}{9}{section*.13}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces \textbf  {IV RMSE (vol points) by strike and maturity.} Colour scale: green $=$ low error, red $=$ high error. Each cell shows RMSE relative to the 10k-path MC reference. SpectralFilter (exact PSD) and BochnerMLP maintain near-uniform low error across the entire strike--maturity grid. SpectralFilter (asymptotic) shows a concentrated error mass at long maturities ($T=1.00$) and deep OTM puts ($K/S_0 \leq 0.85$), precisely the region where the power-law PSD approximation is least accurate. }}{10}{figure.7}\protected@file@percent }
+\newlabel{fig:rmse-heatmap}{{7}{10}{\textbf {IV RMSE (vol points) by strike and maturity.} Colour scale: green $=$ low error, red $=$ high error. Each cell shows RMSE relative to the 10k-path MC reference. SpectralFilter (exact PSD) and BochnerMLP maintain near-uniform low error across the entire strike--maturity grid. SpectralFilter (asymptotic) shows a concentrated error mass at long maturities ($T=1.00$) and deep OTM puts ($K/S_0 \leq 0.85$), precisely the region where the power-law PSD approximation is least accurate}{figure.7}{}}
+\newlabel{fig:rmse-heatmap@cref}{{[figure][7][]7}{[1][9][]10}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {8}{\ignorespaces \textbf  {PSD phase diagram.} Left: relative $L^2(\log )$ distance between exact and asymptotic fGn PSD as a function of $H$. Right: IV RMSE vs.\ MC reference for SpectralFilter trained on exact (blue) and asymptotic (orange) PSD. Below $H \approx 0.15$ (shaded) the exact target is essential; above $H = 0.20$ both targets achieve comparable accuracy. Baseline parameters: $\eta =1.9$, $\xi _0=0.04$, $\rho =0$, $N=252$. }}{10}{figure.8}\protected@file@percent }
+\newlabel{fig:psd-phase}{{8}{10}{\textbf {PSD phase diagram.} Left: relative $L^2(\log )$ distance between exact and asymptotic fGn PSD as a function of $H$. Right: IV RMSE vs.\ MC reference for SpectralFilter trained on exact (blue) and asymptotic (orange) PSD. Below $H \approx 0.15$ (shaded) the exact target is essential; above $H = 0.20$ both targets achieve comparable accuracy. Baseline parameters: $\eta =1.9$, $\xi _0=0.04$, $\rho =0$, $N=252$}{figure.8}{}}
+\newlabel{fig:psd-phase@cref}{{[figure][8][]8}{[1][9][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Observation-horizon sensitivity}{10}{subsection.5.5}\protected@file@percent }
+\newlabel{sec:horizon}{{5.5}{10}{Observation-horizon sensitivity}{subsection.5.5}{}}
+\newlabel{sec:horizon@cref}{{[subsection][5][5]5.5}{[1][9][]10}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Observation-horizon sensitivity ($H=0.1$, $\Delta t=1/252$, 3 evaluation seeds). IV RMSE at terminal maturity $T$; $|\Delta H|$ from structure-function estimator. Surrogate performs well for $T\leq 2$~yr; IV RMSE spikes at $T=5$~yr due to the amplified low-frequency cutoff penalty $C_3\omega _0^{-(1-2H)/2}$ (Theorem~\ref {thm:main}) and the reduced MC budget at large $N$.}}{10}{table.4}\protected@file@percent }
+\newlabel{tab:horizon-sweep}{{4}{10}{Observation-horizon sensitivity ($H=0.1$, $\Delta t=1/252$, 3 evaluation seeds). IV RMSE at terminal maturity $T$; $|\Delta H|$ from structure-function estimator. Surrogate performs well for $T\leq 2$~yr; IV RMSE spikes at $T=5$~yr due to the amplified low-frequency cutoff penalty $C_3\omega _0^{-(1-2H)/2}$ (Theorem~\ref {thm:main}) and the reduced MC budget at large $N$}{table.4}{}}
+\newlabel{tab:horizon-sweep@cref}{{[table][4][]4}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Runtime comparison}{10}{subsection.5.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reference IV surface ($H=0.1$, $\rho =0$).}{10}{section*.14}\protected@file@percent }
+\citation{bennedsen2017hybrid}
+\@writefile{lof}{\contentsline {figure}{\numberline {9}{\ignorespaces \textbf  {Horizon sensitivity.} Left: mean absolute Hurst estimation error $|\hat  H - H|$ vs.\ horizon $T$. Right: IV RMSE at terminal maturity vs.\ $T$. Hurst error decreases monotonically with $T$ (more data $\Rightarrow $ better frequency resolution). IV RMSE is non-monotone: it stays low for $T\leq 2$~yr and spikes at $T=5$~yr, where the low-frequency singularity degrades the PSD fit. }}{11}{figure.9}\protected@file@percent }
+\newlabel{fig:horizon-sweep}{{9}{11}{\textbf {Horizon sensitivity.} Left: mean absolute Hurst estimation error $|\hat H - H|$ vs.\ horizon $T$. Right: IV RMSE at terminal maturity vs.\ $T$. Hurst error decreases monotonically with $T$ (more data $\Rightarrow $ better frequency resolution). IV RMSE is non-monotone: it stays low for $T\leq 2$~yr and spikes at $T=5$~yr, where the low-frequency singularity degrades the PSD fit}{figure.9}{}}
+\newlabel{fig:horizon-sweep@cref}{{[figure][9][]9}{[1][10][]11}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Wall-clock time for generating $10{,}000$ variance paths ($N=252$, $T=1$ year). Surrogates benchmarked on NVIDIA GTX~950 (2~GB); Wood--Chan runs on CPU (single core). Training cost amortised over $10^6$ generated paths (${}^\dagger $estimated).}}{11}{table.5}\protected@file@percent }
+\newlabel{tab:timing}{{5}{11}{Wall-clock time for generating $10{,}000$ variance paths ($N=252$, $T=1$ year). Surrogates benchmarked on NVIDIA GTX~950 (2~GB); Wood--Chan runs on CPU (single core). Training cost amortised over $10^6$ generated paths (${}^\dagger $estimated)}{table.5}{}}
+\newlabel{tab:timing@cref}{{[table][5][]5}{[1][10][]11}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}CausalSpectralFilter: supporting $\rho \neq  0$}{11}{subsection.5.7}\protected@file@percent }
+\newlabel{sec:causal}{{5.7}{11}{CausalSpectralFilter: supporting $\rho \neq 0$}{subsection.5.7}{}}
+\newlabel{sec:causal@cref}{{[subsection][7][5]5.7}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Setup: $z$-Cholesky and the BLP reference.}{11}{section*.15}\protected@file@percent }
+\newlabel{eq:z-cholesky}{{12}{11}{Setup: $z$-Cholesky and the BLP reference}{equation.12}{}}
+\newlabel{eq:z-cholesky@cref}{{[equation][12][]12}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Circular filter: catastrophic failure.}{11}{section*.16}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {10}{\ignorespaces \textbf  {CausalSpectralFilter vs circular SpectralFilter ($\rho =-0.9$).} Each panel shows one maturity. BLP reference (black) has the correct left skew. Causal $z$-Cholesky (green dashed) tracks the reference closely at all strikes; causal $\rho =0$ baseline (blue dotted) matches the IV \emph  {level} but not the skew. Circular $z$-Cholesky (red dash-dot) is physically invalid (IVs exceed 100\% and deltas $>1$ at long maturities, not shown on this scale). }}{12}{figure.10}\protected@file@percent }
+\newlabel{fig:causal-iv}{{10}{12}{\textbf {CausalSpectralFilter vs circular SpectralFilter ($\rho =-0.9$).} Each panel shows one maturity. BLP reference (black) has the correct left skew. Causal $z$-Cholesky (green dashed) tracks the reference closely at all strikes; causal $\rho =0$ baseline (blue dotted) matches the IV \emph {level} but not the skew. Circular $z$-Cholesky (red dash-dot) is physically invalid (IVs exceed 100\% and deltas $>1$ at long maturities, not shown on this scale)}{figure.10}{}}
+\newlabel{fig:causal-iv@cref}{{[figure][10][]10}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{CausalSpectralFilter: architecture and initialisation.}{12}{section*.17}\protected@file@percent }
+\newlabel{eq:causal-filter}{{13}{12}{CausalSpectralFilter: architecture and initialisation}{equation.13}{}}
+\newlabel{eq:causal-filter@cref}{{[equation][13][]13}{[1][11][]12}{}{}{}}
+\newlabel{eq:rl-init}{{14}{12}{CausalSpectralFilter: architecture and initialisation}{equation.14}{}}
+\newlabel{eq:rl-init@cref}{{[equation][14][]14}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Results.}{12}{section*.18}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces IV RMSE vs BLP rBergomi reference ($\rho =-0.9$, 8k paths each) and ATM $\Delta $ at $T=0.50$. Causal $z$-Cholesky is 63$\times $ better than the circular architecture and reduces the delta bias by 60\% vs.\ the $\rho =0$ baseline.}}{12}{table.6}\protected@file@percent }
+\newlabel{tab:causal-blp}{{6}{12}{IV RMSE vs BLP rBergomi reference ($\rho =-0.9$, 8k paths each) and ATM $\Delta $ at $T=0.50$. Causal $z$-Cholesky is 63$\times $ better than the circular architecture and reduces the delta bias by 60\% vs.\^^Mthe $\rho =0$ baseline}{table.6}{}}
+\newlabel{tab:causal-blp@cref}{{[table][6][]6}{[1][12][]12}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Robustness across $H$.}{12}{section*.19}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces CausalSpectralFilter robustness sweep across $H$, all conditions at $\rho =-0.9$, 8k paths. IV RMSE in vol points vs BLP reference; $\Delta $ bias = $\hat  \Delta _{\mathrm  {ATM}} - \Delta _{\mathrm  {ATM,ref}}$ at $T=0.50$.}}{13}{table.7}\protected@file@percent }
+\newlabel{tab:causal-hurst}{{7}{13}{CausalSpectralFilter robustness sweep across $H$, all conditions at $\rho =-0.9$, 8k paths. IV RMSE in vol points vs BLP reference; $\Delta $ bias = $\hat \Delta _{\mathrm {ATM}} - \Delta _{\mathrm {ATM,ref}}$ at $T=0.50$}{table.7}{}}
+\newlabel{tab:causal-hurst@cref}{{[table][7][]7}{[1][12][]13}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Closing the residual: matched-PSD training.}{13}{section*.20}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Effect of matching the training PSD to the reference V distribution ($H=0.1$, $\rho =-0.9$, 5k surrogate paths). IV RMSE is against the BLP reference; bias is $\hat  \Delta _{\mathrm  {ATM}} - \Delta _{\mathrm  {ATM,ref}}$. Matching the training PSD to the RL-fBm distribution eliminates the residual bias.}}{13}{table.8}\protected@file@percent }
+\newlabel{tab:rl-match}{{8}{13}{Effect of matching the training PSD to the reference V distribution ($H=0.1$, $\rho =-0.9$, 5k surrogate paths). IV RMSE is against the BLP reference; bias is $\hat \Delta _{\mathrm {ATM}} - \Delta _{\mathrm {ATM,ref}}$. Matching the training PSD to the RL-fBm distribution eliminates the residual bias}{table.8}{}}
+\newlabel{tab:rl-match@cref}{{[table][8][]8}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Two negative results: spectral matching of rough Heston $V$ makes things worse.}{13}{section*.21}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Attempts to match rough Heston $V$ within the spectral framework all underperform the rBergomi-$V$ baseline. Spectral surrogates capture second-order statistics; rough Heston $V$'s skewness and heavy tails require higher-order modelling.}}{13}{table.9}\protected@file@percent }
+\newlabel{tab:rh-negatives}{{9}{13}{Attempts to match rough Heston $V$ within the spectral framework all underperform the rBergomi-$V$ baseline. Spectral surrogates capture second-order statistics; rough Heston $V$'s skewness and heavy tails require higher-order modelling}{table.9}{}}
+\newlabel{tab:rh-negatives@cref}{{[table][9][]9}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Sub-quadratic Volterra updates.}{14}{section*.22}\protected@file@percent }
+\newlabel{eq:markov-state}{{15}{14}{Sub-quadratic Volterra updates}{equation.15}{}}
+\newlabel{eq:markov-state@cref}{{[equation][15][]15}{[1][14][]14}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Sub-quadratic Volterra via $M$-mode RL kernel approximation ($H=0.1$, $N=252$, batch $5\,000$, GPU). $M = 5$ already saturates the kernel-fit error ($\approx 4\%$ relative) and gives the best IV-RMSE of the sweep, $7\times $ faster than the exact $O(N^2)$ baseline.}}{14}{table.10}\protected@file@percent }
+\newlabel{tab:markov-volterra}{{10}{14}{Sub-quadratic Volterra via $M$-mode RL kernel approximation ($H=0.1$, $N=252$, batch $5\,000$, GPU). $M = 5$ already saturates the kernel-fit error ($\approx 4\%$ relative) and gives the best IV-RMSE of the sweep, $7\times $ faster than the exact $O(N^2)$ baseline}{table.10}{}}
+\newlabel{tab:markov-volterra@cref}{{[table][10][]10}{[1][14][]14}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Non-affine generalisation and full joint training.}{14}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Live SPY option chain calibration (multi-maturity).}{14}{section*.24}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Multi-maturity calibration to live SPY options ($S_0 = \$745.64$, $\rho = -0.85$, $26$ calibration points across three expirations). Overall IV RMSE $3.97$~vp; the short-end fits within $2\times $ bid/ask uncertainty, while the long-end shows a systematic under-pricing of OTM calls characteristic of single-kernel rough-vol calibrations (the surrogate's variance grows too slowly with $T$).}}{15}{table.11}\protected@file@percent }
+\newlabel{tab:spy-multi}{{11}{15}{Multi-maturity calibration to live SPY options ($S_0 = \$745.64$, $\rho = -0.85$, $26$ calibration points across three expirations). Overall IV RMSE $3.97$~vp; the short-end fits within $2\times $ bid/ask uncertainty, while the long-end shows a systematic under-pricing of OTM calls characteristic of single-kernel rough-vol calibrations (the surrogate's variance grows too slowly with $T$)}{table.11}{}}
+\newlabel{tab:spy-multi@cref}{{[table][11][]11}{[1][14][]15}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{SPX Hurst index from ATM term structure.}{15}{section*.25}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {11}{\ignorespaces \textbf  {SPX Hurst analysis.} Left: log-log ATM IV vs.\ maturity; slope gives $\hat  {H}_\mathrm  {SPX} = 0.145$. Right: IV surface, SpectralFilter (trained at $H=0.145$, $\eta =1.485$) vs.\ BLP reference ($T\in \{0.25,0.50,1.00\}$~yr, $K/S_0\in [0.80,1.20]$). IV RMSE $= 1.43$~vp. }}{15}{figure.11}\protected@file@percent }
+\newlabel{fig:spx-hurst}{{11}{15}{\textbf {SPX Hurst analysis.} Left: log-log ATM IV vs.\ maturity; slope gives $\hat {H}_\mathrm {SPX} = 0.145$. Right: IV surface, SpectralFilter (trained at $H=0.145$, $\eta =1.485$) vs.\ BLP reference ($T\in \{0.25,0.50,1.00\}$~yr, $K/S_0\in [0.80,1.20]$). IV RMSE $= 1.43$~vp}{figure.11}{}}
+\newlabel{fig:spx-hurst@cref}{{[figure][11][]11}{[1][15][]15}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Forward-variance parameterisation: rBergomi-style.}{15}{section*.26}\protected@file@percent }
+\newlabel{eq:fwd-var}{{16}{15}{Forward-variance parameterisation: rBergomi-style}{equation.16}{}}
+\newlabel{eq:fwd-var@cref}{{[equation][16][]16}{[1][15][]15}{}{}{}}
+\citation{buhler2019deep}
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces rBergomi forward-variance calibration on SPY (same chain as Table~\ref {tab:spy-multi}, $\rho =-0.85$, $\eta = 1.485$). Martingale property holds exactly after the empirical-mean correction; remaining residual is moneyness-driven, not maturity-driven.}}{16}{table.12}\protected@file@percent }
+\newlabel{tab:spy-rbergomi}{{12}{16}{rBergomi forward-variance calibration on SPY (same chain as Table~\ref {tab:spy-multi}, $\rho =-0.85$, $\eta = 1.485$). Martingale property holds exactly after the empirical-mean correction; remaining residual is moneyness-driven, not maturity-driven}{table.12}{}}
+\newlabel{tab:spy-rbergomi@cref}{{[table][12][]12}{[1][15][]16}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Remaining open directions for Paper~3:}{16}{section*.27}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {6}Discussion}{16}{section.6}\protected@file@percent }
+\newlabel{sec:discussion}{{6}{16}{Discussion}{section.6}{}}
+\newlabel{sec:discussion@cref}{{[section][6][]6}{[1][16][]16}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why the exact PSD matters.}{16}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{BochnerMLP: architecture-agnostic spectral loss.}{16}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Application to deep hedging.}{16}{section*.30}\protected@file@percent }
+\citation{abijaber2019affine,el2019perfect}
+\citation{bayer2020markovian}
+\citation{TODO-paper1}
+\@writefile{toc}{\contentsline {paragraph}{Comparison to Markovian approximations.}{17}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Connection to Paper 1.}{17}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {7}Conclusion}{17}{section.7}\protected@file@percent }
+\newlabel{sec:conclusion}{{7}{17}{Conclusion}{section.7}{}}
+\newlabel{sec:conclusion@cref}{{[section][7][]7}{[1][17][]17}{}{}{}}
+\citation{buhler2019deep}
+\citation{gelbrich1990formula}
+\citation{bhatia1997matrix}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Proofs}{18}{appendix.A}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Proof of Theorem~\ref {thm:main}}{18}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reduction to the Gelbrich formula.}{18}{section*.33}\protected@file@percent }
+\newlabel{eq:gelbrich-main}{{17}{18}{Reduction to the Gelbrich formula}{equation.17}{}}
+\newlabel{eq:gelbrich-main@cref}{{[equation][17][]17}{[1][18][]18}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Step 1 (Square-root Lipschitz).}{18}{section*.34}\protected@file@percent }
+\newlabel{eq:sqrt-lip}{{18}{18}{Step 1 (Square-root Lipschitz)}{equation.18}{}}
+\newlabel{eq:sqrt-lip@cref}{{[equation][18][]18}{[1][18][]18}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm).}{18}{section*.35}\protected@file@percent }
+\newlabel{eq:parseval-main}{{19}{18}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm)}{equation.19}{}}
+\newlabel{eq:parseval-main@cref}{{[equation][19][]19}{[1][18][]18}{}{}{}}
+\citation{TODO-paper1}
+\citation{wood1994simulation,dietrich1997fast}
+\citation{wood1994simulation}
+\citation{dietrich1997fast}
+\bibstyle{plainnat}
+\bibdata{references}
+\newlabel{eq:spectral-bound}{{20}{19}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm)}{equation.20}{}}
+\newlabel{eq:spectral-bound@cref}{{[equation][20][]20}{[1][18][]19}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Step 3 (Discretisation error).}{19}{section*.36}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step 4 (Low-frequency cutoff).}{19}{section*.37}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Combining the three terms.}{19}{section*.38}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Wood--Chan simulation}{19}{subsection.A.2}\protected@file@percent }
+\newlabel{app:wood-chan}{{A.2}{19}{Wood--Chan simulation}{subsection.A.2}{}}
+\newlabel{app:wood-chan@cref}{{[subsection][2][1]A.2}{[1][19][]19}{}{}{}}
+\gdef \@abspage@last{19}

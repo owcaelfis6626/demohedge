@@ -1,0 +1,282 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{2}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{2}{Introduction}{section.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Motivation}{2}{subsection.1.1}\protected@file@percent }
+\newlabel{subsec:motivation}{{1.1}{2}{Motivation}{subsection.1.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}The Problem}{3}{subsection.1.2}\protected@file@percent }
+\newlabel{subsec:problem}{{1.2}{3}{The Problem}{subsection.1.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.3}Contribution}{4}{subsection.1.3}\protected@file@percent }
+\newlabel{subsec:contribution}{{1.3}{4}{Contribution}{subsection.1.3}{}}
+\citation{Raissi2019}
+\citation{Rahaman2019,Tancik2020}
+\citation{Tancik2020}
+\citation{Lu2021DeepONet}
+\citation{Wang2022}
+\citation{Wang2024Causal}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.4}Gap analysis}{8}{subsection.1.4}\protected@file@percent }
+\newlabel{subsec:gap-analysis}{{1.4}{8}{Gap analysis}{subsection.1.4}{}}
+\@writefile{toc}{\contentsline {paragraph}{Standard physics-informed networks.}{8}{section*.1}\protected@file@percent }
+\citation{YangMengKarniadakis2021}
+\citation{Li2021FNO}
+\citation{Lu2021DeepONet}
+\citation{DuEtAl2024NSM}
+\@writefile{toc}{\contentsline {paragraph}{Bayesian PINNs.}{9}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Neural operators and neural spectral methods.}{9}{section*.3}\protected@file@percent }
+\citation{Durall2020}
+\citation{Engel2020DDSP}
+\citation{Chakraborty2025BSP}
+\citation{Whittle1953}
+\citation{Worrall2025SpectralShaping}
+\citation{Hu2024ScoreFPINN}
+\@writefile{toc}{\contentsline {paragraph}{Spectral and distributional losses elsewhere.}{10}{section*.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Concurrent and architectural approaches.}{10}{section*.5}\protected@file@percent }
+\citation{WangMscaleDNN2023,WangMscaleDeepONet2025}
+\citation{KhodakaramiHFS2025}
+\citation{XiongSVSNN2025}
+\citation{KhodakaramiKarniadakis2026}
+\citation{Chakraborty2025BSP}
+\@writefile{toc}{\contentsline {paragraph}{Spectral bias mitigation in deterministic settings.}{11}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Synthesis.}{12}{section*.7}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Section roadmap}{12}{subsection.1.5}\protected@file@percent }
+\newlabel{subsec:roadmap}{{1.5}{12}{Section roadmap}{subsection.1.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Bochner PINN: at each epoch $e$ the network $u_\theta $ and the FD reference $u_{\mathrm  {FD}}$ are both evaluated on a sub-grid $\mathcal  {G}_s(e)$ drawn uniformly at random from the full FD grid. Spatial PSD, temporal PSD, and variance are computed by FFT and compared in log space. The random re-sampling at each epoch prevents sub-grid overfit (Section~\ref {subsec:rand-subgrid}).}}{13}{figure.1}\protected@file@percent }
+\newlabel{fig:method-schematic}{{1}{13}{Bochner PINN: at each epoch $e$ the network $u_\theta $ and the FD reference $u_{\mathrm {FD}}$ are both evaluated on a sub-grid $\mathcal {G}_s(e)$ drawn uniformly at random from the full FD grid. Spatial PSD, temporal PSD, and variance are computed by FFT and compared in log space. The random re-sampling at each epoch prevents sub-grid overfit (Section~\ref {subsec:rand-subgrid})}{figure.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Method}{13}{section.2}\protected@file@percent }
+\newlabel{sec:method}{{2}{13}{Method}{section.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.1}What goes wrong with the standard PINN}{13}{subsection.2.1}\protected@file@percent }
+\citation{Whittle1953,Dahlhaus1996,Brillinger1981}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.2}Three terms, three diagnostics}{14}{subsection.2.2}\protected@file@percent }
+\newlabel{subsec:losses}{{2.2}{14}{Three terms, three diagnostics}{subsection.2.2}{}}
+\newlabel{eq:losses}{{1}{14}{Three terms, three diagnostics}{equation.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Why log, why MSE, why a sub-grid}{14}{subsection.2.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Why this is the right object}{15}{subsection.2.4}\protected@file@percent }
+\newlabel{subsec:right-object}{{2.4}{15}{Why this is the right object}{subsection.2.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.5}Total objective and architecture}{16}{subsection.2.5}\protected@file@percent }
+\newlabel{subsec:total-objective}{{2.5}{16}{Total objective and architecture}{subsection.2.5}{}}
+\newlabel{eq:total-loss}{{3}{16}{Total objective and architecture}{equation.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.6}Randomised spectral sub-grid}{17}{subsection.2.6}\protected@file@percent }
+\newlabel{subsec:rand-subgrid}{{2.6}{17}{Randomised spectral sub-grid}{subsection.2.6}{}}
+\newlabel{eq:rand-subgrid}{{4}{17}{Randomised spectral sub-grid}{equation.4}{}}
+\citation{MishraMolinaro2022,DeRyckMishra2022}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.7}Cumulant-matching loss}{18}{subsection.2.7}\protected@file@percent }
+\newlabel{subsec:cumulant-loss}{{2.7}{18}{Cumulant-matching loss}{subsection.2.7}{}}
+\newlabel{eq:cumulant-loss}{{5}{18}{Cumulant-matching loss}{equation.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.8}Hyperparameters}{18}{subsection.2.8}\protected@file@percent }
+\newlabel{subsec:hyper}{{2.8}{18}{Hyperparameters}{subsection.2.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {2.9}Complexity}{18}{subsection.2.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Why the spectral loss matches the law: motivation and scope}{18}{section.3}\protected@file@percent }
+\newlabel{sec:theory}{{3}{18}{Why the spectral loss matches the law: motivation and scope}{section.3}{}}
+\citation{RudinRCA}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Spectral measures determine second-order structure}{19}{subsection.3.1}\protected@file@percent }
+\newlabel{eq:bochner}{{6}{19}{Spectral measures determine second-order structure}{equation.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Separability assumption.}{19}{section*.8}\protected@file@percent }
+\citation{Brillinger1981,Dahlhaus1996}
+\citation{Whittle1953}
+\citation{Brillinger1981}
+\newlabel{rem:scope}{{1}{20}{Scope of the spectral loss}{remark.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Why the log scale is the right choice (and its bias floor)}{20}{subsection.3.2}\protected@file@percent }
+\citation{MishraMolinaro2022}
+\@writefile{toc}{\contentsline {paragraph}{Irreducible bias floor.}{21}{section*.9}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.3}Quantitative convergence rate}{21}{subsection.3.3}\protected@file@percent }
+\newlabel{subsec:convergence}{{3.3}{21}{Quantitative convergence rate}{subsection.3.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.1}Assumptions}{21}{subsubsection.3.3.1}\protected@file@percent }
+\citation{ContTankov2003}
+\citation{ContTankov2003}
+\newlabel{eq:tolerance}{{7}{22}{Assumptions}{equation.7}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.2}Main theorem}{23}{subsubsection.3.3.2}\protected@file@percent }
+\newlabel{thm:main}{{1}{23}{Convergence rate of the Bochner PINN}{proposition.1}{}}
+\newlabel{eq:main-bound}{{8}{24}{Convergence rate of the Bochner PINN}{equation.8}{}}
+\newlabel{lem:log-linear}{{1}{24}{Log-to-linear control}{lemma.1}{}}
+\newlabel{eq:log-linear-applied}{{10}{24}{Main theorem}{equation.10}{}}
+\newlabel{lem:quadrature}{{2}{24}{Expected spectral quadrature error}{lemma.2}{}}
+\citation{Trefethen2000}
+\citation{Brillinger1981}
+\newlabel{rem:periodogram-variance}{{2}{25}{Single-realisation variance and the proof gap}{remark.2}{}}
+\newlabel{lem:single-realisation}{{3}{25}{Single-realisation spectral consistency under mixing}{lemma.3}{}}
+\citation{Dahlhaus1996}
+\citation{Brillinger1981}
+\citation{Dahlhaus1996}
+\newlabel{eq:sr-mse}{{11}{26}{Single-realisation spectral consistency under mixing}{equation.11}{}}
+\newlabel{eq:spectral-l2-bound}{{12}{26}{Main theorem}{equation.12}{}}
+\citation{Gelbrich1990,GivensShortt1984}
+\citation{MishraMolinaro2022}
+\citation{MishraMolinaro2022}
+\newlabel{lem:gelbrich}{{4}{27}{Plancherel--Gelbrich bound}{lemma.4}{}}
+\newlabel{lem:mm}{{5}{27}{Mishra--Molinaro, adapted}{lemma.5}{}}
+\newlabel{eq:spectral-path}{{{$\star $}}{28}{Main theorem}{AMS.10}{}}
+\newlabel{eq:pde-path}{{{$\dagger $}}{28}{Main theorem}{AMS.11}{}}
+\citation{MishraMolinaro2022}
+\citation{Brillinger1981}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.3}Corollaries}{29}{subsubsection.3.3.3}\protected@file@percent }
+\newlabel{cor:vr}{{2}{29}{Variance-gap rate}{proposition.2}{}}
+\newlabel{rem:em-floor}{{3}{29}{Irreducible Euler--Mascheroni floor}{remark.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.4}Extension to L\'evy-driven fields}{30}{subsubsection.3.3.4}\protected@file@percent }
+\newlabel{thm:levy-ext}{{3}{30}{Second-order convergence for stationary L\'evy fields}{proposition.3}{}}
+\newlabel{prop:levy-ito}{{4}{30}{Full-law convergence via L\'evy--It\^o coupling}{proposition.4}{}}
+\newlabel{eq:levy-ito-bound}{{13}{31}{Full-law convergence via L\'evy--It\^o coupling}{equation.13}{}}
+\newlabel{eq:levy-ito-triangle}{{14}{31}{Extension to L\'evy-driven fields}{equation.14}{}}
+\newlabel{rem:vg-J}{{4}{31}{VG quantification of $J$}{remark.4}{}}
+\citation{ChenGoldsteinShao2011}
+\citation{ChenGoldsteinShao2011}
+\citation{ContTankov2003,MadanCarrChang1998}
+\newlabel{cor:berry-esseen}{{5}{32}{Berry--Esseen tightness of spectral matching}{proposition.5}{}}
+\newlabel{eq:be-bound}{{15}{32}{Berry--Esseen tightness of spectral matching}{equation.15}{}}
+\newlabel{eq:kappa3-vg}{{16}{32}{Berry--Esseen tightness of spectral matching}{equation.16}{}}
+\newlabel{eq:be-vg}{{17}{32}{Berry--Esseen tightness of spectral matching}{equation.17}{}}
+\@writefile{toc}{\contentsline {paragraph}{Tightness condition.}{32}{section*.12}\protected@file@percent }
+\newlabel{rem:be-numerical}{{5}{32}{Numerical tightness}{remark.5}{}}
+\newlabel{cor:smoothed-loss}{{6}{33}{Single-realisation rate with kernel-smoothed loss}{proposition.6}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.5}Extension to non-separable covariance}{33}{subsubsection.3.3.5}\protected@file@percent }
+\newlabel{subsec:nonsep-extension}{{3.3.5}{33}{Extension to non-separable covariance}{subsubsection.3.3.5}{}}
+\citation{Brillinger1981,Trefethen2000}
+\@writefile{toc}{\contentsline {paragraph}{Relaxed separability assumption.}{34}{section*.13}\protected@file@percent }
+\newlabel{eq:joint-tolerance}{{{A4$'$}}{34}{Relaxed separability assumption}{AMS.14}{}}
+\newlabel{lem:joint-quadrature}{{6}{34}{Joint spectral quadrature error}{lemma.6}{}}
+\newlabel{thm:nonsep}{{7}{34}{Convergence rate under non-separable covariance}{proposition.7}{}}
+\newlabel{eq:nonsep-bound}{{18}{34}{Convergence rate under non-separable covariance}{equation.18}{}}
+\newlabel{eq:spectral-path-nonsep}{{{$\star '$}}{35}{Relaxed separability assumption}{AMS.15}{}}
+\@writefile{toc}{\contentsline {paragraph}{Rate comparison.}{35}{section*.16}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.6}Discussion of the rate}{36}{subsubsection.3.3.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Optimality.}{36}{section*.17}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Floor regime.}{36}{section*.18}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Connection to numerical results.}{36}{section*.19}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{What is and is not proved.}{37}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.3.7}End-to-end training-time bound}{37}{subsubsection.3.3.7}\protected@file@percent }
+\newlabel{subsec:training-time}{{3.3.7}{37}{End-to-end training-time bound}{subsubsection.3.3.7}{}}
+\newlabel{prop:ntk}{{8}{37}{End-to-end training-time bound}{proposition.8}{}}
+\newlabel{eq:w2-time}{{19}{37}{End-to-end training-time bound}{equation.19}{}}
+\citation{Wang2022}
+\citation{Wang2022}
+\citation{MishraMolinaro2022}
+\newlabel{eq:training-time}{{20}{38}{End-to-end training-time bound}{equation.20}{}}
+\newlabel{rem:lambda-min}{{6}{38}{Lower-bounding $\lambda _{\min }(K)$ for the spectral loss}{remark.6}{}}
+\@writefile{toc}{\contentsline {paragraph}{Relation to existing PINN error analysis.}{38}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.4}The Heston volatility channel: initial diagnosis}{39}{subsection.3.4}\protected@file@percent }
+\newlabel{subsec:cir-analysis}{{3.4}{39}{The Heston volatility channel: initial diagnosis}{subsection.3.4}{}}
+\newlabel{rem:cir}{{7}{39}{Why the spectral loss alone is not sufficient on CIR-type channels}{remark.7}{}}
+\citation{MadanCarrChang1998}
+\citation{ContTankov2003}
+\@writefile{toc}{\contentsline {section}{\numberline {4}Experimental setup}{40}{section.4}\protected@file@percent }
+\newlabel{sec:setup}{{4}{40}{Experimental setup}{section.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Benchmark problems}{40}{subsection.4.1}\protected@file@percent }
+\newlabel{subsec:problems}{{4.1}{40}{Benchmark problems}{subsection.4.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Hierarchical 2D SPDE.}{40}{section*.22}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Burgers-VG.}{40}{section*.23}\protected@file@percent }
+\newlabel{eq:burgersvg}{{21}{40}{Burgers-VG}{equation.21}{}}
+\@writefile{toc}{\contentsline {paragraph}{Heston-VG.}{40}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.2}Reference solver}{40}{subsection.4.2}\protected@file@percent }
+\citation{YangMengKarniadakis2021}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.3}Metrics}{41}{subsection.4.3}\protected@file@percent }
+\newlabel{subsec:metrics}{{4.3}{41}{Metrics}{subsection.4.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.4}Baselines}{41}{subsection.4.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Vanilla deterministic PINN.}{41}{section*.25}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Bayesian PINN (mean-field Bayes-by-Backprop).}{42}{section*.26}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Seeds and compute}{42}{subsection.4.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5}Results}{42}{section.5}\protected@file@percent }
+\newlabel{sec:results}{{5}{42}{Results}{section.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Variance gap closure}{42}{subsection.5.1}\protected@file@percent }
+\newlabel{subsec:gap}{{5.1}{42}{Variance gap closure}{subsection.5.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Variance gap closure across methods and problems. Bars show mean $\pm $ standard deviation of $\mathrm  {Var}(u_\theta )/\mathrm  {Var}(u_{\mathrm  {FD}})$ across seeds. Dashed line: target value $1.0$. The Bochner PINN closes the variance gap on every channel; the B-PINN posterior mean collapses to near zero on the driven channels.}}{43}{figure.2}\protected@file@percent }
+\newlabel{fig:variance-gap}{{2}{43}{Variance gap closure across methods and problems. Bars show mean $\pm $ standard deviation of $\mathrm {Var}(u_\theta )/\mathrm {Var}(u_{\mathrm {FD}})$ across seeds. Dashed line: target value $1.0$. The Bochner PINN closes the variance gap on every channel; the B-PINN posterior mean collapses to near zero on the driven channels}{figure.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{One outlier seed on the $y$ channel.}{43}{section*.27}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces Spectrum matching across methods, $y$-axis on $\log _{10}$ scale. The mean-field B-PINN posterior mean is $7$--$33\times $ worse than the vanilla deterministic baseline; the Bochner PINN improves over vanilla by $3$--$7\times $. Note the Hier.\ $z$ panel: the Bochner-vs-B-PINN gap is $113\times $ on log-spatial PSD MSE.}}{44}{figure.3}\protected@file@percent }
+\newlabel{fig:logpsd-bars}{{3}{44}{Spectrum matching across methods, $y$-axis on $\log _{10}$ scale. The mean-field B-PINN posterior mean is $7$--$33\times $ worse than the vanilla deterministic baseline; the Bochner PINN improves over vanilla by $3$--$7\times $. Note the Hier.\ $z$ panel: the Bochner-vs-B-PINN gap is $113\times $ on log-spatial PSD MSE}{figure.3}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why the $p$-channel temporal MSE is unusually small.}{44}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Heston-VG price channel}{44}{subsection.5.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Heston-VG volatility channel: sub-grid overfit diagnosis and fix}{45}{subsection.5.3}\protected@file@percent }
+\newlabel{subsec:heston-diag}{{5.3}{45}{Heston-VG volatility channel: sub-grid overfit diagnosis and fix}{subsection.5.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}The initial anomaly}{45}{subsubsection.5.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Root cause: spectral sub-grid overfit}{45}{subsubsection.5.3.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.3}Fix: randomised spectral sub-grid}{46}{subsubsection.5.3.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.4}Residual kurtosis gap and cumulant matching}{46}{subsubsection.5.3.4}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces Heston-VG volatility channel: 2\(\times \)4 ablation. Left: variance ratio (target 1.0, dashed). Right: excess kurtosis (reference 27.3, dashed). Fixed sub-grid saturates at vr\(\approx \)0.14 regardless of loss; random sub-grid restores vr\(\approx \)0.93 for all four modes. Among random-subgrid variants, cumulant and levy-cumulant recover kurtosis (25.1) while standard and log-variance remain near Gaussian (\(\kappa _4\approx 4\)).}}{47}{figure.4}\protected@file@percent }
+\newlabel{fig:heston-ablation}{{4}{47}{Heston-VG volatility channel: 2\(\times \)4 ablation. Left: variance ratio (target 1.0, dashed). Right: excess kurtosis (reference 27.3, dashed). Fixed sub-grid saturates at vr\(\approx \)0.14 regardless of loss; random sub-grid restores vr\(\approx \)0.93 for all four modes. Among random-subgrid variants, cumulant and levy-cumulant recover kurtosis (25.1) while standard and log-variance remain near Gaussian (\(\kappa _4\approx 4\))}{figure.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Qualitative comparison: field snapshots}{47}{subsection.5.4}\protected@file@percent }
+\newlabel{subsec:snapshots}{{5.4}{47}{Qualitative comparison: field snapshots}{subsection.5.4}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.5}Bayesian uncertainty does not substitute for a distributional loss}{47}{subsection.5.5}\protected@file@percent }
+\newlabel{subsec:bpinn}{{5.5}{47}{Bayesian uncertainty does not substitute for a distributional loss}{subsection.5.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.6}Per-component ablation: are all three losses needed?}{48}{subsection.5.6}\protected@file@percent }
+\newlabel{subsec:ablation}{{5.6}{48}{Per-component ablation: are all three losses needed?}{subsection.5.6}{}}
+\citation{DuEtAl2024NSM}
+\citation{Worrall2025SpectralShaping}
+\citation{Hu2024ScoreFPINN}
+\citation{Li2021FNO}
+\citation{Li2021FNO}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.7}Comparison with concurrent neural-spectral methods}{49}{subsection.5.7}\protected@file@percent }
+\newlabel{subsec:concurrent}{{5.7}{49}{Comparison with concurrent neural-spectral methods}{subsection.5.7}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Bochner FNO: extending the loss to operator surrogates}{49}{section.6}\protected@file@percent }
+\newlabel{sec:spectral-fno}{{6}{49}{Bochner FNO: extending the loss to operator surrogates}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Setup}{50}{subsection.6.1}\protected@file@percent }
+\newlabel{subsec:fno-setup}{{6.1}{50}{Setup}{subsection.6.1}{}}
+\@writefile{toc}{\contentsline {paragraph}{Architecture.}{50}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Loss.}{50}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Problems.}{50}{section*.31}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Results}{50}{subsection.6.2}\protected@file@percent }
+\newlabel{subsec:fno-results}{{6.2}{50}{Results}{subsection.6.2}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {7}Extension to 3D problems}{50}{section.7}\protected@file@percent }
+\newlabel{sec:3d}{{7}{50}{Extension to 3D problems}{section.7}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.1}Setup}{51}{subsection.7.1}\protected@file@percent }
+\newlabel{subsec:3d-setup}{{7.1}{51}{Setup}{subsection.7.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.2}Per-component ablation in 3D}{51}{subsection.7.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.3}Grid-convergence study}{51}{subsection.7.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {7.4}Reading the 3D result}{52}{subsection.7.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {8}Real-world calibration: financial markets and space weather}{52}{section.8}\protected@file@percent }
+\newlabel{sec:real-world}{{8}{52}{Real-world calibration: financial markets and space weather}{section.8}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.1}Datasets and calibration protocol}{53}{subsection.8.1}\protected@file@percent }
+\newlabel{subsec:datasets}{{8.1}{53}{Datasets and calibration protocol}{subsection.8.1}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.2}Results}{53}{subsection.8.2}\protected@file@percent }
+\newlabel{subsec:realworld-results}{{8.2}{53}{Results}{subsection.8.2}{}}
+\@writefile{toc}{\contentsline {paragraph}{EUR/USD: the clean financial case.}{53}{section*.32}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{BTC, oil, gas: easy log-price, harder variance.}{53}{section*.33}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Solar wind: a pathological vanilla baseline.}{54}{section*.34}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Geomagnetic AE: extreme tails.}{54}{section*.35}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {8.3}Reading the real-world result}{55}{subsection.8.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {9}Discussion}{55}{section.9}\protected@file@percent }
+\newlabel{sec:discussion}{{9}{55}{Discussion}{section.9}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.1}What the loss does and what it does not do}{55}{subsection.9.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.2}Heston volatility channel: diagnosed and fixed}{56}{subsection.9.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.3}S channel on Heston-VG: a harder problem}{57}{subsection.9.3}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.4}Where uncertainty quantification helps and where it does not}{57}{subsection.9.4}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {9.5}Limitations}{58}{subsection.9.5}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {10}Conclusion}{59}{section.10}\protected@file@percent }
+\newlabel{sec:conclusion}{{10}{59}{Conclusion}{section.10}{}}
+\bibstyle{elsarticle-num}
+\bibdata{references}
+\@writefile{toc}{\let\numberline\tmptocnumberline}
+\@writefile{toc}{\contentsline {section}{\numberline {Appendix~A}L\'evy intensity threshold sweep}{62}{appendix.A}\protected@file@percent }
+\newlabel{app:levy-tau}{{Appendix~A}{62}{L\'evy intensity threshold sweep}{appendix.A}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {Appendix~A.1}Setup}{62}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {Appendix~A.2}Results}{62}{subsection.A.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {Appendix~A.3}Conclusions}{62}{subsection.A.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Hyperparameters used by all methods. Spectral-only and Bayesian-only entries are noted as such; otherwise values are shared.}}{64}{table.1}\protected@file@percent }
+\newlabel{tab:hyper}{{1}{64}{Hyperparameters used by all methods. Spectral-only and Bayesian-only entries are noted as such; otherwise values are shared}{table.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Burgers-VG. Mean \(\pm \) standard deviation across seeds. Higher variance ratio is better (target 1.0); lower log-PSD MSE is better (asymptotic floor: 0.063).}}{65}{table.2}\protected@file@percent }
+\newlabel{tab:burgersvg}{{2}{65}{Burgers-VG. Mean \(\pm \) standard deviation across seeds. Higher variance ratio is better (target 1.0); lower log-PSD MSE is better (asymptotic floor: 0.063)}{table.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Hierarchical 2D SPDE. Mean \(\pm \) standard deviation across seeds and test seeds. Asymptotic log-PSD MSE floor: 0.063.}}{65}{table.3}\protected@file@percent }
+\newlabel{tab:hier}{{3}{65}{Hierarchical 2D SPDE. Mean \(\pm \) standard deviation across seeds and test seeds. Asymptotic log-PSD MSE floor: 0.063}{table.3}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces Heston-VG volatility channel \(V\): 2\(\times \)4 ablation over sub-grid type and loss mode. Mean \(\pm \) standard deviation across 3 training seeds \(\times \) 5 validation seeds = 15 evaluations per cell. Reference excess kurtosis \(\kappa _4^{\mathrm  {ref}} = 27.3\); reference variance \(\mathrm  {Var}(V_{\mathrm  {FD}})\) is the same across all cells.}}{66}{table.4}\protected@file@percent }
+\newlabel{tab:heston-2x4}{{4}{66}{Heston-VG volatility channel \(V\): 2\(\times \)4 ablation over sub-grid type and loss mode. Mean \(\pm \) standard deviation across 3 training seeds \(\times \) 5 validation seeds = 15 evaluations per cell. Reference excess kurtosis \(\kappa _4^{\mathrm {ref}} = 27.3\); reference variance \(\mathrm {Var}(V_{\mathrm {FD}})\) is the same across all cells}{table.4}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Per-component ablation on Burgers-VG. Mean $\pm $ standard deviation across five seeds per variant. Higher var.\ ratio is better (target 1.0); lower log-PSD MSE is better (asymptotic floor 0.063).}}{66}{table.5}\protected@file@percent }
+\newlabel{tab:ablation}{{5}{66}{Per-component ablation on Burgers-VG. Mean $\pm $ standard deviation across five seeds per variant. Higher var.\ ratio is better (target 1.0); lower log-PSD MSE is better (asymptotic floor 0.063)}{table.5}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {5}{\ignorespaces Qualitative field comparison on the hierarchical 2D SPDE. Top row: FD reference $u_{\mathrm  {FD}}$ at three time slices. Bottom row: Bochner PINN prediction $u_\theta $ at the same slices, same realisation of the noise driver. The Bochner PINN reproduces the jump-induced fine structure that the deterministic vanilla baseline suppresses.}}{67}{figure.5}\protected@file@percent }
+\newlabel{fig:snapshots}{{5}{67}{Qualitative field comparison on the hierarchical 2D SPDE. Top row: FD reference $u_{\mathrm {FD}}$ at three time slices. Bottom row: Bochner PINN prediction $u_\theta $ at the same slices, same realisation of the noise driver. The Bochner PINN reproduces the jump-induced fine structure that the deterministic vanilla baseline suppresses}{figure.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Bochner FNO vs.\ vanilla FNO on five problems. Higher var.\ ratio is better (target 1.0); lower log-PSD MSE is better.}}{68}{table.6}\protected@file@percent }
+\newlabel{tab:spectral-fno}{{6}{68}{Bochner FNO vs.\ vanilla FNO on five problems. Higher var.\ ratio is better (target 1.0); lower log-PSD MSE is better}{table.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Burgers-VG 3D: per-component ablation. Mean \(\pm \) standard deviation across 3 seeds per variant.}}{68}{table.7}\protected@file@percent }
+\newlabel{tab:burgers3d-ablation}{{7}{68}{Burgers-VG 3D: per-component ablation. Mean \(\pm \) standard deviation across 3 seeds per variant}{table.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Burgers-VG 3D: grid convergence of the spectral losses (mean over 3 seeds), evaluated on the full \(32^3 \times 128\) FD reference.}}{69}{table.8}\protected@file@percent }
+\newlabel{tab:grid-conv-3d}{{8}{69}{Burgers-VG 3D: grid convergence of the spectral losses (mean over 3 seeds), evaluated on the full \(32^3 \times 128\) FD reference}{table.8}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {6}{\ignorespaces Burgers-VG 3D: grid-convergence study across four resolutions. (a) Log-spatial PSD MSE on log--log axes; the vanilla PINN's match deteriorates as more wavenumbers come into view, while the Bochner PINN stays within a factor of 30 of the Euler--Mascheroni floor across all four resolutions. (b) Variance loss on semi-log axes; the Bochner PINN drops from \(10^{-3}\) to \(10^{-5}\) as the sub-grid refines, while the vanilla baseline is stuck at \(\sim 0.2\) regardless of resolution.}}{69}{figure.6}\protected@file@percent }
+\newlabel{fig:grid3d}{{6}{69}{Burgers-VG 3D: grid-convergence study across four resolutions. (a) Log-spatial PSD MSE on log--log axes; the vanilla PINN's match deteriorates as more wavenumbers come into view, while the Bochner PINN stays within a factor of 30 of the Euler--Mascheroni floor across all four resolutions. (b) Variance loss on semi-log axes; the Bochner PINN drops from \(10^{-3}\) to \(10^{-5}\) as the sub-grid refines, while the vanilla baseline is stuck at \(\sim 0.2\) regardless of resolution}{figure.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces Real-world datasets used for VG calibration. Source, sampling frequency, sample size, empirical excess kurtosis of log-returns, and calibrated VG parameters. Calibration via maximum-likelihood estimation on the Madan--Carr--Chang characteristic function inverted by Carr--Madan FFT.}}{70}{table.9}\protected@file@percent }
+\newlabel{tab:datasets}{{9}{70}{Real-world datasets used for VG calibration. Source, sampling frequency, sample size, empirical excess kurtosis of log-returns, and calibrated VG parameters. Calibration via maximum-likelihood estimation on the Madan--Carr--Chang characteristic function inverted by Carr--Madan FFT}{table.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Variance ratio (target 1.0) on six real-data-calibrated SPDEs. Mean \(\pm \) standard deviation across 3 training seeds \(\times \) 5 validation seeds = 15 evaluations per cell. ``L'' is the log-price channel; ``v'' is the variance / velocity channel.}}{70}{table.10}\protected@file@percent }
+\newlabel{tab:realworld}{{10}{70}{Variance ratio (target 1.0) on six real-data-calibrated SPDEs. Mean \(\pm \) standard deviation across 3 training seeds \(\times \) 5 validation seeds = 15 evaluations per cell. ``L'' is the log-price channel; ``v'' is the variance / velocity channel}{table.10}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {7}{\ignorespaces Real-data calibration on six datasets: log-price variance ratio (target 1.0). Vanilla PINN (red) leaves a substantial gap on EUR/USD (vr~=~0.41), solar wind (0.69), and geomagnetic AE (0.26). Bochner PINN (blue) closes the gap to within 5--30\% of unity on all six datasets without per-dataset hyperparameter retuning. Datasets span sampling frequencies from minute (EUR/USD) to daily (BTC, crude, gas) and empirical kurtosis from 4.4 to 230.}}{71}{figure.7}\protected@file@percent }
+\newlabel{fig:realworld}{{7}{71}{Real-data calibration on six datasets: log-price variance ratio (target 1.0). Vanilla PINN (red) leaves a substantial gap on EUR/USD (vr~=~0.41), solar wind (0.69), and geomagnetic AE (0.26). Bochner PINN (blue) closes the gap to within 5--30\% of unity on all six datasets without per-dataset hyperparameter retuning. Datasets span sampling frequencies from minute (EUR/USD) to daily (BTC, crude, gas) and empirical kurtosis from 4.4 to 230}{figure.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {A.11}{\ignorespaces L\'evy intensity threshold sweep, V channel. Mean $\pm $ standard deviation across 15 evaluations (3 train $\times $ 5 val seeds). Reference: vr = 1.0, $\kappa _4 = 27.3$, jf\(_3\sigma \) = 0.0238.}}{71}{table.11}\protected@file@percent }
+\newlabel{tab:levy-tau}{{A.11}{71}{L\'evy intensity threshold sweep, V channel. Mean $\pm $ standard deviation across 15 evaluations (3 train $\times $ 5 val seeds). Reference: vr = 1.0, $\kappa _4 = 27.3$, jf\(_3\sigma \) = 0.0238}{table.11}{}}
+\gdef \@abspage@last{71}

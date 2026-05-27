@@ -1,0 +1,141 @@
+\relax 
+\providecommand\hyper@newdestlabel[2]{}
+\providecommand\HyField@AuxAddToFields[1]{}
+\providecommand\HyField@AuxAddToCoFields[2]{}
+\citation{TODO-paper2a}
+\@writefile{toc}{\contentsline {section}{\numberline {1}Introduction}{1}{section.1}\protected@file@percent }
+\newlabel{sec:intro}{{1}{1}{Introduction}{section.1}{}}
+\newlabel{sec:intro@cref}{{[section][1][]1}{[1][1][]1}{}{}{}}
+\citation{bennedsen2017hybrid}
+\citation{ElEuch2019,el2019perfect}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.1}Leverage effect and Greek bias ($\rho = -0.9$)}{3}{subsection.1.1}\protected@file@percent }
+\newlabel{sec:greeks}{{1.1}{3}{Leverage effect and Greek bias ($\rho = -0.9$)}{subsection.1.1}{}}
+\newlabel{sec:greeks@cref}{{[subsection][1][1]1.1}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Setup.}{3}{section*.2}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{IV surface.}{3}{section*.3}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Rough Heston reference IV surface ($H=0.1$, $\kappa =2$, $\nu =1.9$, $\rho =-0.9$, 8k paths). Left skew is pronounced; SpectralFilter~(C, $\rho =0$) achieves overall RMSE 7.8~vp by matching the level of the smile despite ignoring skew.}}{3}{table.1}\protected@file@percent }
+\newlabel{tab:iv-rh}{{1}{3}{Rough Heston reference IV surface ($H=0.1$, $\kappa =2$, $\nu =1.9$, $\rho =-0.9$, 8k paths). Left skew is pronounced; SpectralFilter~(C, $\rho =0$) achieves overall RMSE 7.8~vp by matching the level of the smile despite ignoring skew}{table.1}{}}
+\newlabel{tab:iv-rh@cref}{{[table][1][]1}{[1][3][]3}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Delta bias.}{3}{section*.4}\protected@file@percent }
+\citation{bennedsen2017hybrid}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces ATM delta and bias under rough Heston ($\rho =-0.9$). Bias~A uses the \emph  {same} variance paths as the reference but an independent BM for correlation; it isolates the pure leverage-effect error. Bias~B uses the surrogate variance \emph  {and} an independent BM; it compounds variance-distribution and correlation errors. All biases in $\Delta $-units; reference $\Delta \approx 0.78$ for all $T$.}}{4}{table.2}\protected@file@percent }
+\newlabel{tab:delta-bias}{{2}{4}{ATM delta and bias under rough Heston ($\rho =-0.9$). Bias~A uses the \emph {same} variance paths as the reference but an independent BM for correlation; it isolates the pure leverage-effect error. Bias~B uses the surrogate variance \emph {and} an independent BM; it compounds variance-distribution and correlation errors. All biases in $\Delta $-units; reference $\Delta \approx 0.78$ for all $T$}{table.2}{}}
+\newlabel{tab:delta-bias@cref}{{[table][2][]2}{[1][3][]4}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces \textbf  {Rough Heston IV smiles: reference vs.\ surrogates.} Each panel shows one maturity. Reference (black solid) exhibits a pronounced left skew. Surrogate~B (red dashed, $\rho =-0.9$, wrong BM) is far from the reference; Surrogate~C (blue dotted, $\rho =0$) captures the level of the smile but not its skew. Overall RMSE: 7.8~vp (Surrogate~C) vs.\ 188~vp (Surrogate~B). }}{4}{figure.1}\protected@file@percent }
+\newlabel{fig:rh-iv}{{1}{4}{\textbf {Rough Heston IV smiles: reference vs.\ surrogates.} Each panel shows one maturity. Reference (black solid) exhibits a pronounced left skew. Surrogate~B (red dashed, $\rho =-0.9$, wrong BM) is far from the reference; Surrogate~C (blue dotted, $\rho =0$) captures the level of the smile but not its skew. Overall RMSE: 7.8~vp (Surrogate~C) vs.\ 188~vp (Surrogate~B)}{figure.1}{}}
+\newlabel{fig:rh-iv@cref}{{[figure][1][]1}{[1][4][]4}{}{}{}}
+\newlabel{rem:rho}{{1.1}{4}{Architecture scope and correcting the correlation bias}{theorem.1.1}{}}
+\newlabel{rem:rho@cref}{{[theorem][1][1]1.1}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {1.2}CausalSpectralFilter: supporting $\rho \neq  0$}{4}{subsection.1.2}\protected@file@percent }
+\newlabel{sec:causal}{{1.2}{4}{CausalSpectralFilter: supporting $\rho \neq 0$}{subsection.1.2}{}}
+\newlabel{sec:causal@cref}{{[subsection][2][1]1.2}{[1][4][]4}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Setup: $z$-Cholesky and the BLP reference.}{4}{section*.5}\protected@file@percent }
+\newlabel{eq:z-cholesky}{{1}{4}{Setup: $z$-Cholesky and the BLP reference}{equation.1}{}}
+\newlabel{eq:z-cholesky@cref}{{[equation][1][]1}{[1][4][]4}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces \textbf  {Delta bias per strike and maturity.} Blue bars: Bias~A (same variance, fresh BM), the pure leverage contribution to delta that any marginal-matching surrogate misses. Orange bars: Bias~B (surrogate variance + fresh BM), compounded with the variance-distribution error, which dominates at $T=1$. Bias~A is negative for $K \leq 1.00$ (surrogate under-estimates delta for ITM/ATM calls) and slightly positive for deep OTM, a signature of the leverage effect on the conditional right-tail distribution. }}{5}{figure.2}\protected@file@percent }
+\newlabel{fig:delta-bias}{{2}{5}{\textbf {Delta bias per strike and maturity.} Blue bars: Bias~A (same variance, fresh BM), the pure leverage contribution to delta that any marginal-matching surrogate misses. Orange bars: Bias~B (surrogate variance + fresh BM), compounded with the variance-distribution error, which dominates at $T=1$. Bias~A is negative for $K \leq 1.00$ (surrogate under-estimates delta for ITM/ATM calls) and slightly positive for deep OTM, a signature of the leverage effect on the conditional right-tail distribution}{figure.2}{}}
+\newlabel{fig:delta-bias@cref}{{[figure][2][]2}{[1][4][]5}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Circular filter: catastrophic failure.}{5}{section*.6}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{CausalSpectralFilter: architecture and initialisation.}{5}{section*.7}\protected@file@percent }
+\newlabel{eq:causal-filter}{{2}{5}{CausalSpectralFilter: architecture and initialisation}{equation.2}{}}
+\newlabel{eq:causal-filter@cref}{{[equation][2][]2}{[1][5][]5}{}{}{}}
+\newlabel{eq:rl-init}{{3}{5}{CausalSpectralFilter: architecture and initialisation}{equation.3}{}}
+\newlabel{eq:rl-init@cref}{{[equation][3][]3}{[1][5][]5}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Results.}{5}{section*.8}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces IV RMSE vs BLP rBergomi reference ($\rho =-0.9$, 8k paths each) and ATM $\Delta $ at $T=0.50$. Causal $z$-Cholesky is 63$\times $ better than the circular architecture and reduces the delta bias by 60\% vs.\ the $\rho =0$ baseline.}}{6}{table.3}\protected@file@percent }
+\newlabel{tab:causal-blp}{{3}{6}{IV RMSE vs BLP rBergomi reference ($\rho =-0.9$, 8k paths each) and ATM $\Delta $ at $T=0.50$. Causal $z$-Cholesky is 63$\times $ better than the circular architecture and reduces the delta bias by 60\% vs.\^^Mthe $\rho =0$ baseline}{table.3}{}}
+\newlabel{tab:causal-blp@cref}{{[table][3][]3}{[1][5][]6}{}{}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {3}{\ignorespaces \textbf  {CausalSpectralFilter vs circular SpectralFilter ($\rho =-0.9$).} Each panel shows one maturity. BLP reference (black) has the correct left skew. Causal $z$-Cholesky (green dashed) tracks the reference closely at all strikes; causal $\rho =0$ baseline (blue dotted) matches the IV \emph  {level} but not the skew. Circular $z$-Cholesky (red dash-dot) is physically invalid (IVs exceed 100\% and deltas $>1$ at long maturities, not shown on this scale). }}{6}{figure.3}\protected@file@percent }
+\newlabel{fig:causal-iv}{{3}{6}{\textbf {CausalSpectralFilter vs circular SpectralFilter ($\rho =-0.9$).} Each panel shows one maturity. BLP reference (black) has the correct left skew. Causal $z$-Cholesky (green dashed) tracks the reference closely at all strikes; causal $\rho =0$ baseline (blue dotted) matches the IV \emph {level} but not the skew. Circular $z$-Cholesky (red dash-dot) is physically invalid (IVs exceed 100\% and deltas $>1$ at long maturities, not shown on this scale)}{figure.3}{}}
+\newlabel{fig:causal-iv@cref}{{[figure][3][]3}{[1][5][]6}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Robustness across $H$.}{6}{section*.9}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4}{\ignorespaces CausalSpectralFilter robustness sweep across $H$, all conditions at $\rho =-0.9$, 8k paths. IV RMSE in vol points vs BLP reference; $\Delta $ bias = $\hat  \Delta _{\mathrm  {ATM}} - \Delta _{\mathrm  {ATM,ref}}$ at $T=0.50$.}}{6}{table.4}\protected@file@percent }
+\newlabel{tab:causal-hurst}{{4}{6}{CausalSpectralFilter robustness sweep across $H$, all conditions at $\rho =-0.9$, 8k paths. IV RMSE in vol points vs BLP reference; $\Delta $ bias = $\hat \Delta _{\mathrm {ATM}} - \Delta _{\mathrm {ATM,ref}}$ at $T=0.50$}{table.4}{}}
+\newlabel{tab:causal-hurst@cref}{{[table][4][]4}{[1][5][]6}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Closing the residual: matched-PSD training.}{6}{section*.10}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Cross-model: causal $z$-Cholesky on rough Heston.}{6}{section*.11}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {5}{\ignorespaces Effect of matching the training PSD to the reference V distribution ($H=0.1$, $\rho =-0.9$, 5k surrogate paths). IV RMSE is against the BLP reference; bias is $\hat  \Delta _{\mathrm  {ATM}} - \Delta _{\mathrm  {ATM,ref}}$. Matching the training PSD to the RL-fBm distribution eliminates the residual bias.}}{7}{table.5}\protected@file@percent }
+\newlabel{tab:rl-match}{{5}{7}{Effect of matching the training PSD to the reference V distribution ($H=0.1$, $\rho =-0.9$, 5k surrogate paths). IV RMSE is against the BLP reference; bias is $\hat \Delta _{\mathrm {ATM}} - \Delta _{\mathrm {ATM,ref}}$. Matching the training PSD to the RL-fBm distribution eliminates the residual bias}{table.5}{}}
+\newlabel{tab:rl-match@cref}{{[table][5][]5}{[1][6][]7}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {6}{\ignorespaces Causal SpectralFilter applied to the rough Heston reference ($H=0.1$, $\kappa =2$, $\nu =1.9$, $\rho =-0.9$). Surrogate~$V$ paths are rBergomi (not rough Heston); only the correlation architecture changes from \cref  {sec:greeks}'s Surrogate~B.}}{7}{table.6}\protected@file@percent }
+\newlabel{tab:rh-causal}{{6}{7}{Causal SpectralFilter applied to the rough Heston reference ($H=0.1$, $\kappa =2$, $\nu =1.9$, $\rho =-0.9$). Surrogate~$V$ paths are rBergomi (not rough Heston); only the correlation architecture changes from \cref {sec:greeks}'s Surrogate~B}{table.6}{}}
+\newlabel{tab:rh-causal@cref}{{[table][6][]6}{[1][6][]7}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Two negative results: spectral matching of rough Heston $V$ makes things worse.}{7}{section*.12}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {7}{\ignorespaces Attempts to match rough Heston $V$ within the spectral framework all underperform the rBergomi-$V$ baseline. Spectral surrogates capture second-order statistics; rough Heston $V$'s skewness and heavy tails require higher-order modelling.}}{7}{table.7}\protected@file@percent }
+\newlabel{tab:rh-negatives}{{7}{7}{Attempts to match rough Heston $V$ within the spectral framework all underperform the rBergomi-$V$ baseline. Spectral surrogates capture second-order statistics; rough Heston $V$'s skewness and heavy tails require higher-order modelling}{table.7}{}}
+\newlabel{tab:rh-negatives@cref}{{[table][7][]7}{[1][7][]7}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Volterra-aware prototype closes the cross-model bias.}{8}{section*.13}\protected@file@percent }
+\newlabel{eq:volterra-surrogate}{{4}{8}{Volterra-aware prototype closes the cross-model bias}{equation.4}{}}
+\newlabel{eq:volterra-surrogate@cref}{{[equation][4][]4}{[1][8][]8}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {8}{\ignorespaces Volterra-aware prototype (\ref {eq:volterra-surrogate}) vs the best spectral approach. Both use the same $z$-Cholesky correlation ($\rho =-0.9$). The V-conditional diffusion ($\sqrt  {V_j}$ in the noise term) is the architectural element that closes the cross-model bias.}}{8}{table.8}\protected@file@percent }
+\newlabel{tab:volterra-prototype}{{8}{8}{Volterra-aware prototype (\ref {eq:volterra-surrogate}) vs the best spectral approach. Both use the same $z$-Cholesky correlation ($\rho =-0.9$). The V-conditional diffusion ($\sqrt {V_j}$ in the noise term) is the architectural element that closes the cross-model bias}{table.8}{}}
+\newlabel{tab:volterra-prototype@cref}{{[table][8][]8}{[1][8][]8}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {9}{\ignorespaces End-to-end training of the Volterra surrogate from misspecified init $(\theta , \kappa , \nu ) = (0.10, 1.0, 0.5)$. The auxiliary V-moment loss resolves price-only identifiability and produces the first \emph  {trained} surrogate to beat the spectral floor.}}{8}{table.9}\protected@file@percent }
+\newlabel{tab:volterra-trained}{{9}{8}{End-to-end training of the Volterra surrogate from misspecified init $(\theta , \kappa , \nu ) = (0.10, 1.0, 0.5)$. The auxiliary V-moment loss resolves price-only identifiability and produces the first \emph {trained} surrogate to beat the spectral floor}{table.9}{}}
+\newlabel{tab:volterra-trained@cref}{{[table][9][]9}{[1][8][]8}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Sub-quadratic Volterra updates.}{9}{section*.14}\protected@file@percent }
+\newlabel{eq:markov-state}{{5}{9}{Sub-quadratic Volterra updates}{equation.5}{}}
+\newlabel{eq:markov-state@cref}{{[equation][5][]5}{[1][9][]9}{}{}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {10}{\ignorespaces Sub-quadratic Volterra via $M$-mode RL kernel approximation ($H=0.1$, $N=252$, batch $5\,000$, GPU). $M = 5$ already saturates the kernel-fit error ($\approx 4\%$ relative) and gives the best IV-RMSE of the sweep, $7\times $ faster than the exact $O(N^2)$ baseline.}}{9}{table.10}\protected@file@percent }
+\newlabel{tab:markov-volterra}{{10}{9}{Sub-quadratic Volterra via $M$-mode RL kernel approximation ($H=0.1$, $N=252$, batch $5\,000$, GPU). $M = 5$ already saturates the kernel-fit error ($\approx 4\%$ relative) and gives the best IV-RMSE of the sweep, $7\times $ faster than the exact $O(N^2)$ baseline}{table.10}{}}
+\newlabel{tab:markov-volterra@cref}{{[table][10][]10}{[1][9][]9}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Non-affine generalisation and full joint training.}{9}{section*.15}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Live SPY option chain calibration (multi-maturity).}{9}{section*.16}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {11}{\ignorespaces Multi-maturity calibration to live SPY options ($S_0 = \$745.64$, $\rho = -0.85$, $26$ calibration points across three expirations). Overall IV RMSE $3.97$~vp; the short-end fits within $2\times $ bid/ask uncertainty, while the long-end shows a systematic under-pricing of OTM calls characteristic of single-kernel rough-vol calibrations (the surrogate's variance grows too slowly with $T$).}}{10}{table.11}\protected@file@percent }
+\newlabel{tab:spy-multi}{{11}{10}{Multi-maturity calibration to live SPY options ($S_0 = \$745.64$, $\rho = -0.85$, $26$ calibration points across three expirations). Overall IV RMSE $3.97$~vp; the short-end fits within $2\times $ bid/ask uncertainty, while the long-end shows a systematic under-pricing of OTM calls characteristic of single-kernel rough-vol calibrations (the surrogate's variance grows too slowly with $T$)}{table.11}{}}
+\newlabel{tab:spy-multi@cref}{{[table][11][]11}{[1][9][]10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{SPX Hurst index from ATM term structure.}{10}{section*.17}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {4}{\ignorespaces \textbf  {SPX Hurst analysis.} Left: log-log ATM IV vs.\ maturity; slope gives $\hat  {H}_\mathrm  {SPX} = 0.145$. Right: IV surface, SpectralFilter (trained at $H=0.145$, $\eta =1.485$) vs.\ BLP reference ($T\in \{0.25,0.50,1.00\}$~yr, $K/S_0\in [0.80,1.20]$). IV RMSE $= 1.43$~vp. }}{10}{figure.4}\protected@file@percent }
+\newlabel{fig:spx-hurst}{{4}{10}{\textbf {SPX Hurst analysis.} Left: log-log ATM IV vs.\ maturity; slope gives $\hat {H}_\mathrm {SPX} = 0.145$. Right: IV surface, SpectralFilter (trained at $H=0.145$, $\eta =1.485$) vs.\ BLP reference ($T\in \{0.25,0.50,1.00\}$~yr, $K/S_0\in [0.80,1.20]$). IV RMSE $= 1.43$~vp}{figure.4}{}}
+\newlabel{fig:spx-hurst@cref}{{[figure][4][]4}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Forward-variance parameterisation: rBergomi-style.}{10}{section*.18}\protected@file@percent }
+\newlabel{eq:fwd-var}{{6}{10}{Forward-variance parameterisation: rBergomi-style}{equation.6}{}}
+\newlabel{eq:fwd-var@cref}{{[equation][6][]6}{[1][10][]10}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Remaining open directions for Paper~3:}{10}{section*.19}\protected@file@percent }
+\citation{buhler2019deep}
+\@writefile{lot}{\contentsline {table}{\numberline {12}{\ignorespaces rBergomi forward-variance calibration on SPY (same chain as Table~\ref {tab:spy-multi}, $\rho =-0.85$, $\eta = 1.485$). Martingale property holds exactly after the empirical-mean correction; remaining residual is moneyness-driven, not maturity-driven.}}{11}{table.12}\protected@file@percent }
+\newlabel{tab:spy-rbergomi}{{12}{11}{rBergomi forward-variance calibration on SPY (same chain as Table~\ref {tab:spy-multi}, $\rho =-0.85$, $\eta = 1.485$). Martingale property holds exactly after the empirical-mean correction; remaining residual is moneyness-driven, not maturity-driven}{table.12}{}}
+\newlabel{tab:spy-rbergomi@cref}{{[table][12][]12}{[1][10][]11}{}{}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {2}Discussion}{11}{section.2}\protected@file@percent }
+\newlabel{sec:discussion}{{2}{11}{Discussion}{section.2}{}}
+\newlabel{sec:discussion@cref}{{[section][2][]2}{[1][11][]11}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Why the exact PSD matters.}{11}{section*.20}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{BochnerMLP: architecture-agnostic spectral loss.}{11}{section*.21}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Application to deep hedging.}{11}{section*.22}\protected@file@percent }
+\citation{abijaber2019affine,el2019perfect}
+\citation{bayer2020markovian}
+\citation{TODO-paper1}
+\@writefile{toc}{\contentsline {paragraph}{Comparison to Markovian approximations.}{12}{section*.23}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Connection to Paper 1.}{12}{section*.24}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3}Conclusion}{12}{section.3}\protected@file@percent }
+\newlabel{sec:conclusion}{{3}{12}{Conclusion}{section.3}{}}
+\newlabel{sec:conclusion@cref}{{[section][3][]3}{[1][12][]12}{}{}{}}
+\citation{buhler2019deep}
+\citation{gelbrich1990formula}
+\citation{bhatia1997matrix}
+\@writefile{toc}{\contentsline {section}{\numberline {A}Proofs}{13}{appendix.A}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.1}Proof of Theorem~\ref {thm:main}}{13}{subsection.A.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Reduction to the Gelbrich formula.}{13}{section*.25}\protected@file@percent }
+\newlabel{eq:gelbrich-main}{{7}{13}{Reduction to the Gelbrich formula}{equation.7}{}}
+\newlabel{eq:gelbrich-main@cref}{{[equation][7][]7}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Step 1 (Square-root Lipschitz).}{13}{section*.26}\protected@file@percent }
+\newlabel{eq:sqrt-lip}{{8}{13}{Step 1 (Square-root Lipschitz)}{equation.8}{}}
+\newlabel{eq:sqrt-lip@cref}{{[equation][8][]8}{[1][13][]13}{}{}{}}
+\@writefile{toc}{\contentsline {paragraph}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm).}{13}{section*.27}\protected@file@percent }
+\newlabel{eq:parseval-main}{{9}{13}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm)}{equation.9}{}}
+\newlabel{eq:parseval-main@cref}{{[equation][9][]9}{[1][13][]13}{}{}{}}
+\newlabel{eq:spectral-bound}{{10}{13}{Step 2 (Cram\'er kernel to Hilbert--Schmidt norm)}{equation.10}{}}
+\newlabel{eq:spectral-bound@cref}{{[equation][10][]10}{[1][13][]13}{}{}{}}
+\citation{TODO-paper1}
+\citation{wood1994simulation,dietrich1997fast}
+\citation{wood1994simulation}
+\citation{dietrich1997fast}
+\bibstyle{plainnat}
+\bibdata{references}
+\@writefile{toc}{\contentsline {paragraph}{Step 3 (Discretisation error).}{14}{section*.28}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Step 4 (Low-frequency cutoff).}{14}{section*.29}\protected@file@percent }
+\@writefile{toc}{\contentsline {paragraph}{Combining the three terms.}{14}{section*.30}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {A.2}Wood--Chan simulation}{14}{subsection.A.2}\protected@file@percent }
+\newlabel{app:wood-chan}{{A.2}{14}{Wood--Chan simulation}{subsection.A.2}{}}
+\newlabel{app:wood-chan@cref}{{[subsection][2][1]A.2}{[1][14][]14}{}{}{}}
+\gdef \@abspage@last{14}
